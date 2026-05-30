@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>배쓰밤으로 힐링하고 싶은 날 | 예감 홈케어 가이드</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --bg2: #141414;
+      --bg3: #1a1a1a;
+      --white: #f5f5f0;
+      --muted: #a0a09a;
+      --accent: #c8b89a;
+      --accent2: #8fad8f;
+      --serif: 'Noto Serif KR', serif;
+      --sans: 'Noto Sans KR', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 100px 24px 80px;
+      position: relative;
+      overflow: hidden;
+      background: #0e0e0e;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/yoshi-water.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.45;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+    .hero-eyebrow {
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 6vw, 3.6rem);
+      font-weight: 300;
+      line-height: 1.3;
+      margin-bottom: 32px;
+      color: var(--white);
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 2;
+    }
+
+    .scroll-hint {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 100px 24px; }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    /* ── INTRO / 배쓰밤 추천 ── */
+    .intro { background: var(--bg2); }
+
+    .intro-text {
+      max-width: 640px;
+      margin: 0 auto 72px;
+      text-align: center;
+    }
+
+    .intro-text h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      font-weight: 300;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .intro-text p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 2;
+    }
+
+    .yegam-intro-note {
+      max-width: 480px;
+      margin: 0 auto 56px;
+      text-align: center;
+    }
+
+    .yegam-intro-note p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 2;
+      margin-bottom: 16px;
+    }
+
+    .yegam-intro-note em {
+      color: var(--white);
+      font-style: normal;
+    }
+
+    .yegam-intro-note-small {
+      font-size: 12px !important;
+      color: rgba(160,160,154,0.55) !important;
+      margin-top: 8px;
+    }
+
+    .shorts-wrap {
+      max-width: 300px;
+      margin: 0 auto 56px;
+    }
+
+    .shorts-wrap p {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .shorts-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/16;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg3);
+    }
+
+    .shorts-frame iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: var(--bg3);
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.7;
+      transition: opacity 0.4s, transform 0.6s;
+    }
+
+    .card:hover img { opacity: 0.9; transform: scale(1.03); }
+
+    .card-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 28px 24px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    }
+
+    .card-tag {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .card-name {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── TIP SECTIONS ── */
+    .tip { background: var(--bg); }
+    .tip:nth-child(odd) { background: var(--bg2); }
+
+    .tip-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .tip-inner.reverse { direction: rtl; }
+    .tip-inner.reverse > * { direction: ltr; }
+
+    .tip-number {
+      font-family: var(--serif);
+      font-size: 80px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.06);
+      line-height: 1;
+      margin-bottom: -20px;
+    }
+
+    .tip-text h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 300;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .tip-text p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 2.2;
+      margin-bottom: 16px;
+    }
+
+    .tip-text p:last-child { margin-bottom: 0; }
+
+    .tip-image {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      background: var(--bg3);
+    }
+
+    .tip-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.75;
+      transition: transform 0.6s;
+    }
+
+    .tip-image:hover img { transform: scale(1.04); }
+
+    /* ── 음악 섹션 특별 처리 ── */
+    .music-albums {
+      display: flex;
+      gap: 12px;
+      margin: 28px 0;
+      flex-wrap: wrap;
+    }
+
+    .album {
+      width: 80px;
+      height: 80px;
+      overflow: hidden;
+      border-radius: 4px;
+      background: var(--bg3);
+    }
+
+    .album img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.8;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: background 0.3s, border-color 0.3s;
+      font-family: var(--sans);
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    .btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── 림프마사지 포인트 ── */
+    .massage-points {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .massage-point {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .point-num {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .point-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ── OUTRO ── */
+    .outro {
+      background: var(--bg);
+      text-align: center;
+      padding: 120px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .outro-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1563213126-a4273aed2016?w=1400&q=80');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+    }
+
+    .outro-content { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+
+    .outro-quote {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 32px;
+      color: var(--white);
+    }
+
+    .outro-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 2.2;
+      margin-bottom: 48px;
+    }
+
+    .outro-tag {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    /* ── YEGAM SAID ── */
+    .yegam-said {
+      margin-top: 28px;
+      border: 1px solid rgba(200,184,154,0.25);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(200,184,154,0.05);
+    }
+
+    .yegam-said summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      user-select: none;
+    }
+
+    .yegam-said summary::-webkit-details-marker { display: none; }
+
+    .yegam-said summary::before {
+      content: '▸';
+      font-size: 10px;
+      transition: transform 0.25s;
+      display: inline-block;
+    }
+
+    .yegam-said[open] summary::before { transform: rotate(90deg); }
+
+    .yegam-said .said-body {
+      padding: 0 18px 18px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 2;
+      border-top: 1px solid rgba(200,184,154,0.15);
+      padding-top: 14px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.4;
+      margin: 32px auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      section { padding: 72px 20px; }
+
+      .tip-inner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .tip-inner.reverse { direction: ltr; }
+
+      .tip-image { aspect-ratio: 16/9; }
+
+      .tip-number { font-size: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">예감 홈케어 가이드</p>
+    <h1>배쓰밤으로<br>힐링하고 싶은 날</h1>
+    <p class="hero-desc">
+      배쓰밤 그냥 퐁당만 했다면,<br>
+      조금 아까울 수 있어요.<br>
+      국내외 여러 스파를 다니면서 배운<br>
+      팁 3가지를 접목시켜봤어요.
+    </p>
+    <div class="scroll-hint">scroll</div>
+  </div>
+</section>
+
+<!-- 배쓰밤 추천 -->
+<section class="intro">
+  <div class="container">
+    <div class="yegam-intro-note">
+      <p>저는 목욕을 엄청 좋아해요 ㅋㅋ<br>사우나도 좋아하고, 집에서도 반신욕 자주 하는<br>목욕인간입니다.</p>
+      <p>솔직히 말하면 스트레스 받는 날 더 찾게 돼요.<br>목욕하면서 스트레스도 같이 씻는 느낌이랄까요?!</p>
+      <p>그래서 딱 각 잡고 집에서 힐링할 때는<br>러쉬 제품을 쓰거든요.<br>사실 러쉬 배쓰밤, 저렴하진 않잖아요?!</p>
+      <p>그래서 한 번 쓸 때 제대로 쓰려고 하는데...<br>어머, 아리아나 그란데는 더 야무지게 쓰더라고요 😮</p>
+      <p><em>역시 자기를 돌볼 줄 아는 사람은<br>다르긴 달라요.</em></p>
+      <p class="yegam-intro-note-small">* 러쉬는 브랜드 정책상 광고를 안 해요 ㅋㅋ 광고 받는 그날까지,<br>지금은 찐팬으로 소개하는 콘텐츠입니다.</p>
+    </div>
+
+    <div class="shorts-wrap">
+      <p>아리아나 그란데도 러쉬 팬 🛁</p>
+      <div class="shorts-frame">
+        <iframe
+          src="https://www.youtube.com/embed/CYA6jWPx9sE?autoplay=1&mute=1&loop=1&playlist=CYA6jWPx9sE&playsinline=1"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+
+    <div class="intro-text">
+      <h2>배쓰밤의 근본은 러쉬</h2>
+      <p>
+        시각, 촉각, 후각을 다 만족시킨다고 해야 할까요?!<br>
+        어린아이로 돌아가는 느낌 ㅋㅋㅋ<br><br>
+        퐁당 넣으면 물이 물들고 향이 번지는 <strong style="color:var(--white);">배쓰 밤</strong>,<br>
+        손으로 부숴 넣으면 욕조가 거품으로 가득 차는 <strong style="color:var(--white);">버블 바</strong>.
+      </p>
+    </div>
+
+    <div class="card-grid">
+      <a class="card" href="https://www.lush.co.kr/m/products/view/159?giftYn=Y&dc=standard" target="_blank">
+        <img src="images/bath-bomb-pink.jpg" alt="배쓰 밤" loading="lazy" />
+        <div class="card-info">
+          <p class="card-tag">색감 & 향 집중</p>
+          <p class="card-name">배쓰 밤</p>
+          <p class="card-desc">물에 퐁당 — 색과 향이 욕조를 물들여요</p>
+        </div>
+      </a>
+      <a class="card" href="https://www.lush.co.kr/m/products/view/18?giftYn=Y&dc=standard" target="_blank">
+        <img src="images/lush-store.jpg" alt="버블 바" loading="lazy" />
+        <div class="card-info">
+          <p class="card-tag">거품 좋아하면</p>
+          <p class="card-name">버블 바</p>
+          <p class="card-desc">손으로 부숴 넣으면 욕조가 거품으로 가득</p>
+        </div>
+      </a>
+    </div>
+    <p style="text-align:center; margin-top:16px; font-size:11px; color:rgba(160,160,154,0.5); letter-spacing:1px;">* 클릭하면 러쉬로 구경하러 가기</p>
+  </div>
+</section>
+
+<!-- TIP 01 조명 -->
+<section class="tip" style="background: var(--bg);">
+  <div class="container">
+    <div class="tip-inner">
+      <div class="tip-text">
+        <div class="tip-number">01</div>
+        <p class="section-label">Tip 01</p>
+        <h2>조명을 바꾸면<br>공간이 달라져요</h2>
+        <p>
+          해외 스파를 다니면서 발견한 공통점이에요.<br>
+          어디든 조도가 낮아요.
+        </p>
+        <p>
+          집 형광등 그대로면 현실감 MAX…<br>
+          불 끄고 향초 하나만 켜봐요.<br>
+          분위기 자체가 달라지거든요.
+        </p>
+        <p style="color:var(--accent); font-size:13px;">
+          러쉬에 입욕 타임용 향초 라인 있어요 🕯
+        </p>
+        <details class="yegam-said" open>
+          <summary>yegam said</summary>
+          <div class="said-body">
+            휴대용 무선 스탠드나 향초를 써봐요.<br>
+            정 안되면 휴대폰 후레쉬도 좋아요 🔦<br><br>
+            처음엔 좀 무서울 수 있는데<br>
+            적응된답니다 ㅋㅋ
+          </div>
+        </details>
+      </div>
+      <div class="tip-image">
+        <img src="images/lush-candle.jpg" alt="LUSH 향초" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIP 02 음악 -->
+<section class="tip" style="background: var(--bg2);">
+  <div class="container">
+    <div class="tip-inner reverse">
+      <div class="tip-text">
+        <div class="tip-number">02</div>
+        <p class="section-label">Tip 02</p>
+        <h2>스파 전용 음악이<br>따로 있어요</h2>
+        <p>
+          스파에 가면 늘 그 공간만의 음악이 흘러요.<br>
+          러쉬에 스파 전용 플레이리스트가 있어요.
+        </p>
+        <p>
+          1곡만 눈 감고 들어보면<br>
+          진짜 다른 세계로 이동하는 기분이에요.
+        </p>
+        <details class="yegam-said" open>
+          <summary>yegam said</summary>
+          <div class="said-body">
+            솔직히 저도 처음엔 너무 낯설었어요.<br>
+            지금까지 듣던 음악이랑<br>
+            재질이 달랐거든요 ㅋㅋ<br><br>
+            그런데 1곡은 꼭 들어보세요.<br>
+            낯섦에서 오는 편안함이 있더라고요.<br>
+            한 곡 듣는 동안<br>
+            미지의 세계로 여행하는 느낌이에요.
+          </div>
+        </details>
+
+        <div class="music-albums">
+          <a href="https://youtu.be/u4rre7WFBkQ" target="_blank" rel="noopener" class="album">
+            <img src="https://img.youtube.com/vi/u4rre7WFBkQ/hqdefault.jpg" alt="플레이리스트 1" loading="lazy" />
+          </a>
+          <a href="https://youtu.be/meDxWX467BA" target="_blank" rel="noopener" class="album">
+            <img src="https://img.youtube.com/vi/meDxWX467BA/hqdefault.jpg" alt="플레이리스트 2" loading="lazy" />
+          </a>
+          <a href="https://youtu.be/Z9Mbn9gD01I" target="_blank" rel="noopener" class="album">
+            <img src="https://img.youtube.com/vi/Z9Mbn9gD01I/hqdefault.jpg" alt="플레이리스트 3" loading="lazy" />
+          </a>
+        </div>
+
+        <a class="btn" href="https://youtu.be/u4rre7WFBkQ" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.8 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.7 14.5V9l5.4 2.8-5.4 2.7z"/></svg>
+          지금 바로 들어보기
+        </a>
+      </div>
+      <div class="tip-image">
+        <img src="https://img.youtube.com/vi/u4rre7WFBkQ/maxresdefault.jpg" alt="러쉬 플레이리스트" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIP 03 마사지 -->
+<section class="tip" style="background: var(--bg);">
+  <div class="container">
+    <div class="tip-inner">
+      <div class="tip-text">
+        <div class="tip-number">03</div>
+        <p class="section-label">Tip 03</p>
+        <h2>림프마사지,<br>이때가 타이밍이에요</h2>
+        <p>
+          반신욕으로 체온이 올라오면 근육이 풀려요.<br>
+          이때가 마사지 타이밍이에요.
+        </p>
+        <p>
+          마사지바가 있다면 체온에 녹으면서 슥슥 발려요.<br>
+          없어도 괜찮아요 — 비누로도 충분해요.
+        </p>
+
+        <details class="yegam-said" open>
+          <summary>yegam said</summary>
+          <div class="said-body">
+            마사지바가 없다면<br>
+            바디워시나 바디로션으로 해도 충분해요.<br><br>
+            포인트는 내가 내 몸을<br>
+            부드럽게 마사지해주는 것 🤍
+          </div>
+        </details>
+
+        <div class="massage-points">
+          <div class="massage-point">
+            <div class="point-num">1</div>
+            <p class="point-text">쇄골 아래쪽부터 가슴 방향으로 부드럽게 쓸어내려요</p>
+          </div>
+          <div class="massage-point">
+            <div class="point-num">2</div>
+            <p class="point-text">팔 안쪽을 겨드랑이 쪽으로, 다리는 발끝에서 허벅지 방향으로</p>
+          </div>
+          <div class="massage-point">
+            <div class="point-num">3</div>
+            <p class="point-text">강하게 누르지 말고 피부 위를 살살 밀어주는 느낌으로</p>
+          </div>
+        </div>
+      </div>
+      <div class="tip-image">
+        <img src="images/massage-bar.jpg" alt="LUSH 마사지바" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTRO -->
+<section class="outro">
+  <div class="outro-bg"></div>
+  <div class="outro-content">
+    <div class="divider"></div>
+    <p class="outro-quote">
+      머리가 복잡할 때,<br>
+      심신이 지칠 때—<br>
+      깨끗이 잘 씻기만 해도<br>
+      회복이 돼요.
+    </p>
+    <p class="outro-sub">
+      오늘 소개한 팁 3가지,<br>
+      다음 반신욕 때 하나씩만 해봐요.<br>
+      30분이 달라질 거예요.
+    </p>
+    <div class="divider"></div>
+    <p class="outro-tag">by 예감 · Bath Bomb Guide</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:#0a0a0a; padding: 80px 24px; text-align:center;">
+  <div style="max-width:480px; margin:0 auto;">
+    <p style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:20px;">더 많은 미타임 루틴</p>
+    <p style="font-family:var(--serif); font-size:clamp(1.3rem, 3.5vw, 1.8rem); font-weight:300; line-height:1.7; color:var(--white); margin-bottom:12px;">
+      이런 콘텐츠 계속 받고 싶다면
+    </p>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:40px; line-height:2;">
+      스파 여행, 스킨케어 루틴, 일상 속 미타임 팁을<br>꾸준히 나눠드리고 있어요.
+    </p>
+    <a href="https://www.instagram.com/yegam_song/" target="_blank" rel="noopener"
+      style="display:inline-flex; align-items:center; gap:10px; padding:16px 32px;
+             background:var(--white); color:#0a0a0a; text-decoration:none;
+             font-size:13px; letter-spacing:1.5px; text-transform:uppercase;
+             font-family:var(--sans); font-weight:500; transition:opacity 0.3s;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+      @yegam_song 팔로우하기
+    </a>
+  </div>
+</section>
+
+
+<div id="bubble-container" style="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;"></div>
+
+<style>
+  .bubble {
+    position: absolute;
+    bottom: -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,
+      rgba(255,255,255,0.55),
+      rgba(255,255,255,0.08) 60%,
+      rgba(200,184,154,0.06));
+    border: 1px solid rgba(255,255,255,0.25);
+    animation: bubbleRise linear infinite;
+    will-change: transform, opacity;
+  }
+
+  @keyframes bubbleRise {
+    0%   { transform: translateY(0) translateX(0) scale(1);   opacity: 0; }
+    10%  { opacity: 0.7; }
+    50%  { transform: translateY(-50vh) translateX(var(--drift)) scale(1.05); opacity: 0.5; }
+    90%  { opacity: 0.2; }
+    100% { transform: translateY(-105vh) translateX(calc(var(--drift) * 1.5)) scale(0.9); opacity: 0; }
+  }
+</style>
+
+<script>
+  (function() {
+    const container = document.getElementById('bubble-container');
+    const total = 18;
+
+    function createBubble() {
+      const el = document.createElement('div');
+      el.className = 'bubble';
+      const size = Math.random() * 28 + 8;
+      const left = Math.random() * 100;
+      const duration = Math.random() * 10 + 8;
+      const delay = Math.random() * 12;
+      const drift = (Math.random() - 0.5) * 80;
+
+      el.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${left}%;
+        --drift:${drift}px;
+        animation-duration:${duration}s;
+        animation-delay:${delay}s;
+      `;
+      container.appendChild(el);
+    }
+
+    for (let i = 0; i < total; i++) createBubble();
+  })();
+</script>
+
+</body>
+</html>

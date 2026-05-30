@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오가닉 소창 공구 가격표</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f7f5f2;
+    padding: 30px 20px;
+    color: #2d2d2d;
+  }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  /* 헤더 */
+  .header {
+    background: #2d2d2d;
+    padding: 28px 30px 22px;
+    text-align: center;
+  }
+  .header .sub { color: #aaa; font-size: 11px; font-weight: 300; letter-spacing: 2px; margin-bottom: 6px; }
+  .header .title { color: #fff; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+
+  /* 사은품 박스 */
+  .gift-box {
+    margin: 20px 20px 0;
+    background: #fff8f0;
+    border: 1.5px solid #c17b4e;
+    border-radius: 10px;
+    padding: 14px 20px;
+  }
+  .gift-box .gift-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c17b4e;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .gift-items {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+  }
+  .gift-item {
+    flex: 1;
+    text-align: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 6px;
+    font-size: 11px;
+    color: #555;
+    border: 1px solid #f0ddd0;
+  }
+  .gift-item .amount {
+    font-weight: 700;
+    color: #c17b4e;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* 섹션 */
+  .section {
+    margin: 20px 20px 0;
+  }
+
+  .section-header {
+    background: #7b9e87;
+    color: #fff;
+    padding: 9px 14px;
+    border-radius: 8px 8px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-header .sub-tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 400;
+    color: #d4e8d9;
+  }
+
+  /* 카테고리 헤더 */
+  .cat-header {
+    background: #f0f5f1;
+    padding: 8px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #7b9e87;
+    border-left: 3px solid #7b9e87;
+  }
+
+  /* 테이블 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead tr {
+    background: #f5f5f5;
+  }
+  thead th {
+    padding: 7px 10px;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #888;
+    text-align: center;
+  }
+  thead th:first-child { text-align: left; padding-left: 14px; }
+
+  tbody tr:nth-child(odd) { background: #fafafa; }
+  tbody tr:nth-child(even) { background: #fff; }
+
+  tbody td {
+    padding: 10px 10px;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  tbody td:first-child {
+    text-align: left;
+    padding-left: 14px;
+    font-weight: 500;
+    color: #444;
+  }
+
+  .original {
+    color: #bbb;
+    text-decoration: line-through;
+    font-size: 11px;
+  }
+  .sale {
+    font-weight: 700;
+    color: #c17b4e;
+    font-size: 13.5px;
+  }
+  .discount {
+    color: #7b9e87;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .gift-o {
+    color: #c17b4e;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .gift-x { color: #ddd; font-size: 14px; }
+
+  /* 세트 테이블 */
+  .set-desc {
+    background: #fdf9f6;
+    padding: 7px 14px;
+    font-size: 11px;
+    color: #999;
+    border-top: 1px solid #f0e8e0;
+  }
+  .set-name {
+    font-weight: 700;
+    color: #c17b4e;
+    font-size: 13px;
+    padding: 10px 14px 4px;
+    background: #fafaf8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .set-name .emoji { font-size: 14px; }
+
+  /* 옵션 행 */
+  .option-row td:first-child {
+    color: #666;
+    font-size: 11.5px;
+    padding-left: 22px;
+  }
+  .option-badge {
+    display: inline-block;
+    background: #f0ddd0;
+    color: #c17b4e;
+    font-size: 9.5px;
+    padding: 1px 6px;
+    border-radius: 20px;
+    margin-left: 4px;
+    font-weight: 500;
+  }
+
+  /* 구분선 */
+  .divider {
+    height: 1px;
+    background: #f0ebe5;
+    margin: 0 14px;
+  }
+
+  /* 하단 */
+  .footer {
+    margin: 20px 20px 20px;
+    background: #f5f5f3;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .footer p {
+    font-size: 10px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+  .footer p::before { content: '* '; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="sub">ORGANIC SOGCHANG</div>
+    <div class="title">국내 유일 오가닉 소창 공구 가격표</div>
+  </div>
+
+  <!-- 사은품 박스 -->
+  <div class="gift-box">
+    <div class="gift-title">🎁 금액대별 사은품 혜택 (중복 미적용)</div>
+    <div class="gift-items">
+      <div class="gift-item"><span class="amount">65,000원 이상</span>사은품 ①</div>
+      <div class="gift-item"><span class="amount">100,000원 이상</span>사은품 ②</div>
+      <div class="gift-item"><span class="amount">150,000원 이상</span>사은품 ③</div>
+    </div>
+  </div>
+
+  <!-- 단품 섹션 -->
+  <div class="section">
+    <div class="section-header">🛍 단품 구성</div>
+
+    <!-- 소창 수건 -->
+    <div class="cat-header">🌿 소창 수건 &nbsp;·&nbsp; 정가 18,000원/개</div>
+    <table>
+      <thead><tr>
+        <th>구성</th><th>정가</th><th>공구가</th><th>할인율</th><th>사은품</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>3개</td>
+          <td><span class="original">54,000원</span></td>
+          <td><span class="sale">48,600원</span></td>
+          <td><span class="discount">10%↓</span></td>
+          <td><span class="gift-x">—</span></td>
+        </tr>
+        <tr>
+          <td>5개</td>
+          <td><span class="original">90,000원</span></td>
+          <td><span class="sale">79,500원</span></td>
+          <td><span class="discount">11.7%↓</span></td>
+          <td><span class="gift-o">사은품 ①</span></td>
+        </tr>
+        <tr>
+          <td>10개</td>
+          <td><span class="original">180,000원</span></td>
+          <td><span class="sale">159,000원</span></td>
+          <td><span class="discount">11.7%↓</span></td>
+          <td><span class="gift-o">사은품 ③</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 아기 목욕 수건 -->
+    <div class="cat-header">👶 아기 목욕 수건 &nbsp;·&nbsp; 정가 45,000원/개</div>
+    <table>
+      <thead><tr>
+        <th>구성</th><th>정가</th><th>공구가</th><th>할인율</th><th>사은품</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>1개</td>
+          <td><span class="original">45,000원</span></td>
+          <td><span class="sale">35,900원</span></td>
+          <td><span class="discount">20.2%↓</span></td>
+          <td><span class="gift-x">—</span></td>
+        </tr>
+        <tr>
+          <td>2개</td>
+          <td><span class="original">90,000원</span></td>
+          <td><span class="sale">65,000원</span></td>
+          <td><span class="discount">27.8%↓</span></td>
+          <td><span class="gift-o">사은품 ①</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 어른 목욕 수건 -->
+    <div class="cat-header">🧖 어른 목욕 수건 &nbsp;·&nbsp; 정가 55,000원/개</div>
+    <table>
+      <thead><tr>
+        <th>구성</th><th>정가</th><th>공구가</th><th>할인율</th><th>사은품</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>1개</td>
+          <td><span class="original">55,000원</span></td>
+          <td><span class="sale">45,900원</span></td>
+          <td><span class="discount">16.5%↓</span></td>
+          <td><span class="gift-x">—</span></td>
+        </tr>
+        <tr>
+          <td>2개</td>
+          <td><span class="original">110,000원</span></td>
+          <td><span class="sale">85,000원</span></td>
+          <td><span class="discount">22.7%↓</span></td>
+          <td><span class="gift-o">사은품 ①</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 세트 섹션 -->
+  <div class="section">
+    <div class="section-header">🎁 세트 구성 <span class="sub-tag">세트 전용 특별 구성</span></div>
+
+    <!-- 고운 선물 세트 -->
+    <div class="set-name"><span class="emoji">🎀</span> 고운 선물 세트</div>
+    <div class="set-desc">아기 목욕 수건 1개 + 소창 수건 1개</div>
+    <table>
+      <thead><tr><th style="text-align:left;padding-left:14px">정가</th><th>세트가</th><th>할인율</th><th>사은품</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="text-align:left;padding-left:14px"><span class="original">63,000원</span></td>
+          <td><span class="sale">52,000원</span></td>
+          <td><span class="discount">17.5%↓</span></td>
+          <td><span class="gift-x">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="divider" style="margin-top:12px"></div>
+
+    <!-- 오롯이 세트 -->
+    <div class="set-name"><span class="emoji">🌿</span> 오롯이 세트 &nbsp;<small style="font-size:10px;color:#aaa;font-weight:400">소창 4개 고정 + 목욕수건 선택</small></div>
+    <table>
+      <thead><tr><th style="text-align:left;padding-left:14px">선택</th><th>정가</th><th>세트가</th><th>할인율</th><th>사은품</th></tr></thead>
+      <tbody>
+        <tr class="option-row">
+          <td>어른 목욕 수건</td>
+          <td><span class="original">127,000원</span></td>
+          <td><span class="sale">109,000원</span></td>
+          <td><span class="discount">14.2%↓</span></td>
+          <td><span class="gift-o">사은품 ②</span></td>
+        </tr>
+        <tr class="option-row">
+          <td>아기 목욕 수건<span class="option-badge">-10,000원</span></td>
+          <td><span class="original">117,000원</span></td>
+          <td><span class="sale">99,000원</span></td>
+          <td><span class="discount">15.4%↓</span></td>
+          <td><span class="gift-o">사은품 ①</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="divider" style="margin-top:12px"></div>
+
+    <!-- 나란히 세트 -->
+    <div class="set-name"><span class="emoji">🌿</span> 나란히 세트 &nbsp;<small style="font-size:10px;color:#aaa;font-weight:400">소창 6개 고정 + 목욕수건 선택</small></div>
+    <table>
+      <thead><tr><th style="text-align:left;padding-left:14px">선택</th><th>정가</th><th>세트가</th><th>할인율</th><th>사은품</th></tr></thead>
+      <tbody>
+        <tr class="option-row">
+          <td>어른 2개</td>
+          <td><span class="original">218,000원</span></td>
+          <td><span class="sale">179,000원</span></td>
+          <td><span class="discount">17.9%↓</span></td>
+          <td><span class="gift-o">사은품 ③</span></td>
+        </tr>
+        <tr class="option-row">
+          <td>어른 1개 + 아기 1개<span class="option-badge">-10,000원</span></td>
+          <td><span class="original">208,000원</span></td>
+          <td><span class="sale">169,000원</span></td>
+          <td><span class="discount">18.8%↓</span></td>
+          <td><span class="gift-o">사은품 ③</span></td>
+        </tr>
+        <tr class="option-row">
+          <td>아기 2개<span class="option-badge">-20,000원</span></td>
+          <td><span class="original">198,000원</span></td>
+          <td><span class="sale">159,000원</span></td>
+          <td><span class="discount">19.7%↓</span></td>
+          <td><span class="gift-o">사은품 ③</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 하단 안내 -->
+  <div class="footer">
+    <p>소창 수건 5개/10개 가격은 브랜드 협의 후 최종 확정됩니다</p>
+    <p>사은품 구성은 브랜드사 재고에 따라 결정됩니다</p>
+    <p>나란히 세트 옵션 가격은 스마트스토어 정책 확인 후 확정됩니다</p>
+  </div>
+
+</div>
+</body>
+</html>

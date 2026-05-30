@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__37b31380-510e-471e-a519-c9dbecb68d16__generate-design",
+      "Read(//private/tmp/**)",
+      "Bash(python3)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 build_채산표.py)",
+      "Bash(python3 \"/Users/eunsongkang/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/8732985f-4c97-4bbe-9b8b-361100da59c2/febc1f03-dcc1-406a-9332-9473f7e3317d/skills/xlsx/scripts/recalc.py\" \"/Users/eunsongkang/Desktop/yegam/채산표_2026.xlsx\")",
+      "Bash(extract-text \"채산표_2026.xlsx\")",
+      "WebSearch",
+      "Bash(cp /Users/eunsongkang/Desktop/yegam/bathbomb-tips.html /Users/eunsongkang/Desktop/bathbomb-deploy/bathbomb-tips.html && echo \"완료\")",
+      "WebFetch(domain:hearimlaw.com)",
+      "WebFetch(domain:star-law.kr)",
+      "WebFetch(domain:www.startlawfirm.com)",
+      "WebFetch(domain:yulchon.com)",
+      "WebFetch(domain:www.lawtimes.co.kr)",
+      "WebFetch(domain:ohkimslaw.com)",
+      "WebFetch(domain:www.scourt.go.kr)",
+      "Read(//Users/eunsongkang/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/8732985f-4c97-4bbe-9b8b-361100da59c2/febc1f03-dcc1-406a-9332-9473f7e3317d/skills/xlsx/**)",
+      "Bash(extract-text \"/Users/eunsongkang/Downloads/스마트스토어_전체주문발주발송관리_20260526_0024.xlsx\")",
+      "Read(//Users/eunsongkang/Downloads/**)",
+      "Bash(pip show *)",
+      "Bash(python3 -c \"from reportlab.pdfbase.ttfonts import TTFont; print\\('ok'\\)\")",
+      "Read(//System/Library/Fonts/**)",
+      "Bash(python3 공구가격표.py)",
+      "Bash(ls ~/Library/Fonts/ | grep -i \".ttf\" *)",
+      "Bash(open ~/Desktop/yegam/오가닉소창_공구가격표.pdf)",
+      "Bash(xargs -I {} du -sh \"{}\")"
+    ]
+  }
+}

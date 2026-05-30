@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>니들끼리 안동가니?!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0eb;
+    --card: #ffffff;
+    --accent: #e8956d;
+    --text: #2c2620;
+    --sub: #9a8f87;
+    --border: #ede8e3;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --shadow-sm: 0 2px 12px rgba(0,0,0,0.05);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+    color: var(--text);
+  }
+
+  .header { text-align: center; margin-bottom: 28px; }
+
+  .header-illust { max-width: 200px; margin: 0 auto 10px; display: block; }
+
+  .header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+  .header p { font-size: 0.8rem; color: var(--sub); margin-top: 5px; }
+
+  .name-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 18px 20px;
+    max-width: 420px;
+    margin: 0 auto 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .name-icon {
+    width: 38px; height: 38px;
+    background: #fdf0e8;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+
+  .name-label {
+    font-size: 0.72rem; font-weight: 600; color: var(--sub);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;
+  }
+
+  .name-card input {
+    width: 100%; border: none; outline: none;
+    font-size: 0.95rem; font-weight: 600; color: var(--text);
+    font-family: inherit; background: transparent;
+  }
+  .name-card input::placeholder { color: #ccc; font-weight: 400; }
+
+  .calendar-container { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .month-block { background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); }
+
+  .month-header {
+    padding: 16px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .month-title { font-size: 1rem; font-weight: 700; }
+  .month-badge { background: #fdf0e8; color: var(--accent); font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  .week-row {
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.15s; user-select: none;
+  }
+  .week-row:last-child { border-bottom: none; }
+  .week-row:active { background: #fafafa; }
+  .week-row.blocked { background: #fff5f5; }
+
+  .week-label {
+    font-size: 0.72rem; font-weight: 700; color: var(--sub);
+    width: 34px; flex-shrink: 0; text-align: center; line-height: 1.3;
+  }
+  .week-row.blocked .week-label { color: #e07070; }
+
+  .dates-display { display: flex; gap: 8px; flex: 1; }
+
+  .date-pill {
+    display: flex; flex-direction: column; align-items: center;
+    background: #f7f4f1; border-radius: 12px; padding: 10px 16px;
+    gap: 2px; transition: all 0.2s; flex: 1;
+  }
+  .week-row.blocked .date-pill { background: #fde8e8; text-decoration: line-through; opacity: 0.6; }
+  .date-pill .num { font-size: 1rem; font-weight: 700; line-height: 1; }
+  .date-pill .dow { font-size: 0.62rem; font-weight: 500; color: var(--sub); text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .blockers { display: flex; gap: 4px; flex-wrap: wrap; min-width: 60px; justify-content: flex-end; }
+  .blocker-chip { background: #fde8e8; color: #c0392b; border-radius: 20px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
+
+  .block-btn {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    background: white; color: #ccc; font-size: 1rem;
+    cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .week-row.blocked .block-btn { border-color: #e07070; background: #e07070; color: white; }
+
+  .summary { max-width: 420px; margin: 20px auto 0; background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); }
+
+  .summary-header {
+    padding: 16px 22px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .summary-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #e8956d, #d4784a);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+  }
+  .summary-title { font-size: 0.95rem; font-weight: 700; }
+  .summary-body { padding: 4px 0 8px; }
+
+  .summary-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 22px; border-bottom: 1px solid var(--border); gap: 12px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .avail-dates { font-size: 0.88rem; font-weight: 600; }
+  .avail-count { background: #f0f7f3; color: #2e7d52; border-radius: 20px; padding: 3px 10px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+
+  .empty-summary { color: var(--sub); font-size: 0.85rem; text-align: center; padding: 24px 0; }
+  .refresh-hint { text-align: center; color: var(--sub); font-size: 0.72rem; margin-top: 16px; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg class="header-illust" viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+    <rect width="260" height="160" fill="none"/>
+    <rect x="40" y="108" width="180" height="14" rx="3" fill="#c8a97a" stroke="#a07840" stroke-width="1.2"/>
+    <rect x="44" y="112" width="172" height="10" rx="2" fill="#d4b48a"/>
+    <rect x="58" y="68" width="144" height="44" fill="#e8c98a" stroke="#a07840" stroke-width="1.2"/>
+    <rect x="68" y="76" width="28" height="28" rx="2" fill="#f5e6c8" stroke="#a07840" stroke-width="1"/>
+    <line x1="82" y1="76" x2="82" y2="104" stroke="#a07840" stroke-width="0.8"/>
+    <line x1="68" y1="90" x2="96" y2="90" stroke="#a07840" stroke-width="0.8"/>
+    <rect x="164" y="76" width="28" height="28" rx="2" fill="#f5e6c8" stroke="#a07840" stroke-width="1"/>
+    <line x1="178" y1="76" x2="178" y2="104" stroke="#a07840" stroke-width="0.8"/>
+    <line x1="164" y1="90" x2="192" y2="90" stroke="#a07840" stroke-width="0.8"/>
+    <rect x="108" y="78" width="44" height="34" rx="2" fill="#c8a060" stroke="#a07840" stroke-width="1"/>
+    <line x1="130" y1="78" x2="130" y2="112" stroke="#a07840" stroke-width="0.8"/>
+    <circle cx="124" cy="96" r="2" fill="#7a5a28"/>
+    <circle cx="136" cy="96" r="2" fill="#7a5a28"/>
+    <rect x="55" y="68" width="8" height="44" rx="2" fill="#d4a460" stroke="#a07840" stroke-width="0.8"/>
+    <rect x="197" y="68" width="8" height="44" rx="2" fill="#d4a460" stroke="#a07840" stroke-width="0.8"/>
+    <path d="M32 70 Q45 78 58 68 L202 68 Q215 78 228 70" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M32 70 L44 32 L130 20 L216 32 L228 70 Z" fill="#666" stroke="#444" stroke-width="1.2"/>
+    <line x1="50" y1="65" x2="50" y2="35" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="70" y1="67" x2="65" y2="30" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="90" y1="68" x2="85" y2="25" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="110" y1="69" x2="107" y2="22" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="130" y1="69" x2="130" y2="21" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="150" y1="69" x2="153" y2="22" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="170" y1="68" x2="175" y2="25" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="190" y1="67" x2="195" y2="30" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <line x1="210" y1="65" x2="210" y2="35" stroke="#555" stroke-width="0.5" opacity="0.5"/>
+    <path d="M44 32 Q130 12 216 32" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round"/>
+    <rect x="118" y="16" width="24" height="6" rx="3" fill="#555" stroke="#333" stroke-width="0.8"/>
+    <circle cx="32" cy="70" r="4" fill="#777" stroke="#444" stroke-width="0.8"/>
+    <circle cx="228" cy="70" r="4" fill="#777" stroke="#444" stroke-width="0.8"/>
+    <!-- 캐릭터 1 -->
+    <line x1="88" y1="132" x2="88" y2="148" stroke="#333" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="88" y1="148" x2="82" y2="158" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <line x1="88" y1="148" x2="94" y2="158" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <line x1="88" y1="136" x2="79" y2="130" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <line x1="88" y1="136" x2="98" y2="140" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="88" cy="127" r="6.5" fill="white" stroke="#333" stroke-width="1.8"/>
+    <circle cx="86" cy="127" r="1" fill="#333"/>
+    <circle cx="90" cy="127" r="1" fill="#333"/>
+    <path d="M86 130 Q88 132 90 130" fill="none" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- 캐릭터 2 -->
+    <path d="M162 145 Q168 160 174 145" fill="white" stroke="#333" stroke-width="1.8"/>
+    <line x1="168" y1="132" x2="168" y2="146" stroke="#333" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="165" y1="157" x2="165" y2="146" stroke="#333" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="171" y1="157" x2="171" y2="146" stroke="#333" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="168" y1="136" x2="158" y2="140" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <line x1="168" y1="136" x2="177" y2="130" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="168" cy="127" r="6.5" fill="white" stroke="#333" stroke-width="1.8"/>
+    <path d="M162 124 Q165 118 168 120 Q171 118 174 124" fill="#333" stroke="none"/>
+    <circle cx="166" cy="127" r="1" fill="#333"/>
+    <circle cx="170" cy="127" r="1" fill="#333"/>
+    <path d="M166 130 Q168 132 170 130" fill="none" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="98" y1="140" x2="158" y2="140" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+
+  <h1>니들끼리 안동가니?!</h1>
+  <p>안되는 주를 눌러주세요</p>
+</div>
+
+<div class="name-card">
+  <div class="name-icon">👤</div>
+  <div style="flex:1">
+    <div class="name-label">내 이름</div>
+    <input type="text" id="nameInput" placeholder="이름을 입력하세요" maxlength="10" />
+  </div>
+</div>
+
+<div class="calendar-container" id="calendar"></div>
+
+<div class="summary">
+  <div class="summary-header">
+    <div class="summary-icon">✅</div>
+    <div class="summary-title">모두 가능한 주말</div>
+  </div>
+  <div class="summary-body" id="summaryContent">
+    <p class="empty-summary">아직 데이터가 없어요</p>
+  </div>
+</div>
+
+<p class="refresh-hint">30초마다 자동으로 갱신돼요</p>
+
+<script>
+const DB = "https://andong-6d733-default-rtdb.asia-southeast1.firebasedatabase.app/votes.json";
+
+let data = { blocked_weeks: {} };
+let allWeeks = [];
+
+async function fetchData() {
+  const res = await fetch(DB);
+  const raw = await res.json();
+  data = raw || { blocked_weeks: {} };
+  if (!data.blocked_weeks) data.blocked_weeks = {};
+  render();
+}
+
+async function saveData() {
+  await fetch(DB, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+}
+
+function getName() {
+  return document.getElementById("nameInput").value.trim();
+}
+
+function getWeekends() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(today);
+  end.setMonth(end.getMonth() + 4);
+
+  const months = {};
+  allWeeks = [];
+
+  let d = new Date(today);
+  const wd = d.getDay();
+  if (wd !== 0 && wd !== 6) d.setDate(d.getDate() + (6 - wd));
+
+  while (d <= end) {
+    const dow = d.getDay();
+    if (dow === 6 || dow === 0) {
+      const mKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+      if (!months[mKey]) months[mKey] = [];
+      const iso = d.toISOString().split("T")[0];
+      const sat = new Date(d);
+      if (dow === 0) sat.setDate(d.getDate() - 1);
+      const wKey = sat.toISOString().split("T")[0];
+      const last = months[mKey].at(-1);
+      if (!last || last.weekKey !== wKey) {
+        months[mKey].push({ weekKey: wKey, days: [] });
+        if (!allWeeks.includes(wKey)) allWeeks.push(wKey);
+      }
+      months[mKey].at(-1).days.push({ iso, label: `${d.getDate()}`, dow: dow === 6 ? "SAT" : "SUN" });
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return months;
+}
+
+function toggleBlock(weekKey) {
+  const name = getName();
+  if (!name) { alert("먼저 이름을 입력해주세요!"); return; }
+  if (!data.blocked_weeks[weekKey]) data.blocked_weeks[weekKey] = [];
+  const idx = data.blocked_weeks[weekKey].indexOf(name);
+  if (idx === -1) data.blocked_weeks[weekKey].push(name);
+  else {
+    data.blocked_weeks[weekKey].splice(idx, 1);
+    if (!data.blocked_weeks[weekKey].length) delete data.blocked_weeks[weekKey];
+  }
+  saveData().then(render);
+}
+
+function render() {
+  const name = getName();
+  const months = getWeekends();
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  for (const [mKey, weeks] of Object.entries(months)) {
+    const [y, m] = mKey.split("-");
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    const block = document.createElement("div");
+    block.className = "month-block";
+    block.innerHTML = `
+      <div class="month-header">
+        <span class="month-title">${parseInt(m)}월</span>
+        <span class="month-badge">${y} · ${monthNames[parseInt(m)-1]}</span>
+      </div>
+    `;
+
+    for (const [wi, week] of weeks.entries()) {
+      const blockers = data.blocked_weeks[week.weekKey] || [];
+      const isBlocked = blockers.length > 0;
+
+      const row = document.createElement("div");
+      row.className = "week-row" + (isBlocked ? " blocked" : "");
+      row.onclick = () => toggleBlock(week.weekKey);
+
+      const weekLabel = document.createElement("div");
+      weekLabel.className = "week-label";
+      weekLabel.textContent = `${wi + 1}주차`;
+      row.appendChild(weekLabel);
+
+      const datesDiv = document.createElement("div");
+      datesDiv.className = "dates-display";
+      for (const day of week.days) {
+        datesDiv.innerHTML += `
+          <div class="date-pill">
+            <span class="num">${day.label}</span>
+            <span class="dow">${day.dow}</span>
+          </div>
+        `;
+      }
+
+      const blockersDiv = document.createElement("div");
+      blockersDiv.className = "blockers";
+      for (const b of blockers) {
+        blockersDiv.innerHTML += `<span class="blocker-chip">${b}</span>`;
+      }
+
+      const btn = document.createElement("div");
+      btn.className = "block-btn";
+      btn.textContent = "✕";
+      btn.style.opacity = isBlocked ? "1" : "0.3";
+
+      row.appendChild(datesDiv);
+      row.appendChild(blockersDiv);
+      row.appendChild(btn);
+      block.appendChild(row);
+    }
+
+    cal.appendChild(block);
+  }
+
+  renderSummary();
+}
+
+function renderSummary() {
+  const el = document.getElementById("summaryContent");
+  const available = allWeeks.filter(wk => !data.blocked_weeks[wk]?.length);
+
+  if (!allWeeks.length) {
+    el.innerHTML = '<p class="empty-summary">아직 데이터가 없어요</p>';
+    return;
+  }
+  if (!available.length) {
+    el.innerHTML = '<p class="empty-summary">모두 가능한 주가 없어요 😢</p>';
+    return;
+  }
+
+  el.innerHTML = "";
+  for (const wk of available.slice(0, 6)) {
+    const satDate = new Date(wk + "T00:00:00");
+    const sunDate = new Date(satDate);
+    sunDate.setDate(satDate.getDate() + 1);
+    const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+    const mKey = `${satDate.getFullYear()}-${String(satDate.getMonth()+1).padStart(2,"0")}`;
+    const monthWeeks = allWeeks.filter(w => w.startsWith(mKey));
+    const nthWeek = monthWeeks.indexOf(wk) + 1;
+
+    const row = document.createElement("div");
+    row.className = "summary-row";
+    row.innerHTML = `
+      <div>
+        <div style="font-size:0.72rem;color:var(--sub);font-weight:600;margin-bottom:2px">${satDate.getMonth()+1}월 ${nthWeek}주차</div>
+        <span class="avail-dates">${fmt(satDate)}(토) · ${fmt(sunDate)}(일)</span>
+      </div>
+      <span class="avail-count">모두 가능 ✓</span>
+    `;
+    el.appendChild(row);
+  }
+}
+
+document.getElementById("nameInput").addEventListener("input", render);
+fetchData();
+setInterval(fetchData, 30000);
+</script>
+</body>
+</html>

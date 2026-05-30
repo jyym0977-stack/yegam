@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "약속투표",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["약속투표/server.py"],
+      "port": 8787
+    },
+    {
+      "name": "bathbomb-tips",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8788"],
+      "port": 8788
+    }
+  ]
+}

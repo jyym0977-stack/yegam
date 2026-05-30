@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재무 인스타 카드 v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    padding: 60px 20px 60px;
+  }
+
+  /* ─── 상단 네비 ─── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #0d0d0d;
+    border-bottom: 1px solid #222;
+    padding: 10px 20px;
+    display: flex; gap: 8px; align-items: center;
+    z-index: 999; overflow-x: auto;
+  }
+  .nav-label { color: #444; font-size: 11px; white-space: nowrap; margin-right: 4px; }
+  .nav-btn {
+    background: #1a1a1a; border: 1px solid #333; color: #666;
+    border-radius: 20px; padding: 5px 14px; font-size: 12px;
+    cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
+  }
+  .nav-btn:hover { color: #ccc; border-color: #555; }
+  .nav-btn.active { color: #fff; border-color: transparent; font-weight: 700; }
+  .nav-btn.sk.active { background: #ff4500; }
+  .nav-btn.hd.active { background: #1a6fd4; }
+  .nav-btn.ml.active { background: #18a558; }
+  .nav-btn.hs.active { background: #7c3aed; }
+
+  /* ─── 카드 래퍼 ─── */
+  .card-wrap { width: 390px; }
+  .card-meta { color: #444; font-size: 11px; text-align: center; margin-bottom: 8px; }
+
+  /* ─── 카드 본체 (스크롤 가능한 긴 카드) ─── */
+  .card {
+    width: 390px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── 공통 섹션 ─── */
+  .sec {
+    padding: 28px 26px;
+    border-bottom: 1px solid;
+  }
+
+  .sec-num {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 4px;
+    opacity: 0.5;
+  }
+  .sec-title {
+    font-size: 22px; font-weight: 900; line-height: 1.3;
+    letter-spacing: -0.03em; margin-bottom: 10px;
+  }
+  .sec-body {
+    font-size: 13px; line-height: 1.75; color: #888;
+  }
+  .sec-body strong { color: #ccc; font-weight: 600; }
+
+  /* 태그 */
+  .tags { display: flex; gap: 7px; margin-bottom: 24px; }
+  .tag {
+    display: flex; align-items: center; gap: 5px;
+    border-radius: 20px; padding: 4px 11px;
+    font-size: 11px; font-weight: 600;
+    background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc;
+  }
+  .tag-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* 헤드라인 섹션 */
+  .hero { padding: 36px 26px 28px; }
+  .hero-hl { font-size: 32px; font-weight: 900; line-height: 1.25; letter-spacing: -0.04em; color: #f0f0f0; }
+  .hero-hl span { display: block; }
+  .hero-sub { font-size: 13px; line-height: 1.75; color: #666; margin-top: 16px; }
+  .hero-sub strong { color: #aaa; }
+
+  /* KPI 카드 그리드 */
+  .kpi-row { display: grid; gap: 8px; margin-top: 16px; }
+  .kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row-2 { grid-template-columns: repeat(2, 1fr); }
+  .kpi {
+    background: #111; border: 1px solid #2a2a2a;
+    border-radius: 10px; padding: 14px 12px;
+  }
+  .kpi-label { font-size: 10px; color: #555; margin-bottom: 5px; }
+  .kpi-val { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+  .kpi-unit { font-size: 12px; font-weight: 500; margin-top: 1px; }
+  .kpi-chg { font-size: 10px; color: #555; margin-top: 6px; }
+
+  /* 가로 분해 바 */
+  .breakdown-bar {
+    display: flex; height: 36px; border-radius: 6px;
+    overflow: hidden; margin: 14px 0 10px; gap: 2px;
+  }
+  .bb-seg {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff;
+    transition: flex 0.4s;
+    min-width: 0;
+  }
+  .bb-legend {
+    display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px;
+  }
+  .bb-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #666; }
+  .bb-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* 비용 항목 리스트 */
+  .cost-list { display: flex; flex-direction: column; gap: 0; }
+  .cost-item {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 13px 0;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .cost-item:last-child { border-bottom: none; }
+  .cost-left { flex: 1; padding-right: 12px; }
+  .cost-name { font-size: 13px; font-weight: 700; color: #ccc; margin-bottom: 2px; }
+  .cost-desc { font-size: 11px; color: #555; line-height: 1.5; }
+  .cost-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .cost-pct { font-size: 18px; font-weight: 900; letter-spacing: -0.03em; }
+  .eff-tag {
+    font-size: 9px; font-weight: 700; padding: 2px 7px;
+    border-radius: 4px; white-space: nowrap;
+  }
+  .eff-high { background: #ff450018; color: #ff4500; border: 1px solid #ff450030; }
+  .eff-mid { background: #f59e0b18; color: #f59e0b; border: 1px solid #f59e0b30; }
+  .eff-low { background: #33333344; color: #666; border: 1px solid #333; }
+  .eff-watch { background: #3b9eff18; color: #3b9eff; border: 1px solid #3b9eff30; }
+
+  /* 강조 인사이트 박스 */
+  .insight-box {
+    border-radius: 10px; padding: 18px 16px; margin: 16px 0;
+  }
+  .insight-box p { font-size: 14px; line-height: 1.7; font-weight: 600; }
+  .insight-box .ib-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 10px; line-height: 1.7; font-weight: 400; }
+
+  /* 경쟁사 비교 테이블 */
+  .comp-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  .comp-table th {
+    font-size: 10px; color: #444; font-weight: 600; text-align: left;
+    padding: 6px 10px; border-bottom: 1px solid #222;
+    letter-spacing: 0.04em;
+  }
+  .comp-table td { font-size: 13px; padding: 10px 10px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-co { font-weight: 700; font-size: 12px; }
+  .comp-co small { display: block; font-size: 10px; color: #555; font-weight: 400; margin-top: 1px; }
+
+  /* 추세 라인 */
+  .trend-line {
+    display: flex; align-items: center; gap: 6px; margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .tr-pt { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .tr-yr { font-size: 9px; color: #444; }
+  .tr-val { font-size: 13px; font-weight: 800; }
+  .tr-arr { font-size: 14px; color: #333; margin: 0 2px; }
+
+  /* 시나리오 박스 */
+  .scenario-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .scenario-item {
+    background: #161616; border: 1px solid #252525; border-radius: 8px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sc-label { font-size: 12px; font-weight: 700; color: #ccc; }
+  .sc-desc { font-size: 10px; color: #555; margin-top: 2px; }
+  .sc-val { font-size: 16px; font-weight: 900; }
+
+  /* 용어 사전 */
+  .glossary { display: flex; flex-direction: column; gap: 0; }
+  .gl-item { padding: 12px 0; border-bottom: 1px solid #1a1a1a; }
+  .gl-item:last-child { border-bottom: none; }
+  .gl-term { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+  .gl-def { font-size: 12px; color: #666; line-height: 1.6; }
+
+  /* 출처 푸터 */
+  .source-footer {
+    padding: 14px 20px;
+    background: #0a0a0a;
+    border-top: 1px solid #1a1a1a;
+  }
+  .source-text { font-size: 10px; color: #333; line-height: 1.6; }
+
+  /* ─────────────── 회사별 컬러 ─────────────── */
+  /* SK하이닉스: 오렌지-레드 */
+  .sk .hero, .sk .sec { background: #0d0d0d; border-color: #1e1e1e; }
+  .sk .hero-hl span.acc { color: #ff4500; }
+  .sk .kpi-val.acc { color: #ff4500; }
+  .sk .kpi-unit.acc { color: #ff4500; }
+  .sk .sec-num { color: #ff4500; }
+  .sk .cost-pct.acc { color: #ff4500; }
+  .sk .insight-box.main { background: #ff4500; }
+  .sk .insight-box.main p { color: #fff; }
+  .sk .insight-box.sub { background: #ff450015; border: 1px solid #ff450030; }
+  .sk .insight-box.sub p { color: #ff6030; }
+  .sk::before { content:''; position:absolute; top:0;left:0;right:0;height:160px;
+    background: radial-gradient(ellipse at top left, #ff450018 0%, transparent 70%);
+    pointer-events:none; }
+
+  /* 현대자동차: 블루 */
+  .hd .hero, .hd .sec { background: #080c12; border-color: #141c26; }
+  .hd .hero-hl span.acc { color: #3b9eff; }
+  .hd .kpi-val.acc { color: #3b9eff; }
+  .hd .kpi-unit.acc { color: #3b9eff; }
+  .hd .sec-num { color: #3b9eff; }
+  .hd .cost-pct.acc { color: #3b9eff; }
+  .hd .insight-box.main { background: linear-gradient(135deg, #1a3a6a, #1a4a8a); }
+  .hd .insight-box.main p { color: #fff; }
+  .hd .insight-box.sub { background: #3b9eff12; border: 1px solid #3b9eff25; }
+  .hd .insight-box.sub p { color: #3b9eff; }
+
+  /* 매일유업: 그린 */
+  .ml .hero, .ml .sec { background: #080d09; border-color: #141e15; }
+  .ml .hero-hl span.acc { color: #22c55e; }
+  .ml .kpi-val.acc { color: #22c55e; }
+  .ml .kpi-unit.acc { color: #22c55e; }
+  .ml .sec-num { color: #22c55e; }
+  .ml .cost-pct.acc { color: #22c55e; }
+  .ml .insight-box.main { background: linear-gradient(135deg, #14532d, #166534); }
+  .ml .insight-box.main p { color: #fff; }
+  .ml .insight-box.sub { background: #22c55e12; border: 1px solid #22c55e25; }
+  .ml .insight-box.sub p { color: #22c55e; }
+
+  /* 한샘: 퍼플 */
+  .hs .hero, .hs .sec { background: #09080f; border-color: #171226; }
+  .hs .hero-hl span.acc { color: #a855f7; }
+  .hs .kpi-val.acc { color: #a855f7; }
+  .hs .kpi-unit.acc { color: #a855f7; }
+  .hs .sec-num { color: #a855f7; }
+  .hs .cost-pct.acc { color: #a855f7; }
+  .hs .insight-box.main { background: linear-gradient(135deg, #3b0764, #4c1d95); }
+  .hs .insight-box.main p { color: #fff; }
+  .hs .insight-box.sub { background: #a855f712; border: 1px solid #a855f725; }
+  .hs .insight-box.sub p { color: #c084fc; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="nav-label">카드 →</span>
+  <button class="nav-btn sk active" onclick="go('sk',this)">🔴 SK하이닉스</button>
+  <button class="nav-btn hd" onclick="go('hd',this)">🔵 현대자동차</button>
+  <button class="nav-btn ml" onclick="go('ml',this)">🟢 매일유업</button>
+  <button class="nav-btn hs" onclick="go('hs',this)">🟣 한샘</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ① SK하이닉스                              -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card-wrap" id="sk">
+  <div class="card-meta">① SK하이닉스 · 스크린샷 후 업로드</div>
+  <div class="card sk" style="position:relative;">
+
+    <!-- HERO -->
+    <div class="hero" style="background:#0d0d0d; border-bottom:1px solid #1e1e1e;">
+      <div class="tags">
+        <span class="tag"><span class="tag-dot" style="background:#ff4500;"></span>SK하이닉스</span>
+        <span class="tag" style="color:#555;">반도체 · 2025</span>
+      </div>
+      <div class="hero-hl">
+        매출 100원에<br>
+        <span class="acc" style="color:#ff4500;">영업이익 48.6원.</span>
+      </div>
+      <div class="hero-sub">
+        그 안의 <strong>31원은 5년 전 HBM 베팅의 감가상각</strong>이에요.<br>
+        지금 OPM은 회수 1년차예요.<br><br>
+        진짜 추수기는 <strong>2026~2027.</strong><br>
+        지금 봐야 할 단 하나는 <strong>NAND 가격.</strong>
+      </div>
+    </div>
+
+    <!-- 01 결과 -->
+    <div class="sec sk">
+      <div class="sec-num">01 · 결과</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">2년에 적자에서 사상 최대로</div>
+      <div class="sec-body" style="margin-bottom:16px;">
+        같은 회사·같은 인력·같은 설비.<br>
+        OPM이 <strong style="color:#ef4444;">−23.6%</strong>에서 <strong style="color:#ff4500;">+48.6%</strong>로 흔들렸어요.
+      </div>
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi" style="background:#111;">
+          <div class="kpi-label">매출</div>
+          <div class="kpi-val" style="color:#f0f0f0;">97.15</div>
+          <div class="kpi-unit" style="color:#888;">조</div>
+          <div class="kpi-chg" style="color:#ff4500;">+47% YoY · 사상 최대</div>
+        </div>
+        <div class="kpi" style="background:#111;">
+          <div class="kpi-label">영업이익</div>
+          <div class="kpi-val" style="color:#ff4500;">47.21</div>
+          <div class="kpi-unit" style="color:#ff4500;">조</div>
+          <div class="kpi-chg" style="color:#ff4500;">+101% YoY · 창사 최대</div>
+        </div>
+        <div class="kpi" style="background:#111;">
+          <div class="kpi-label">OPM</div>
+          <div class="kpi-val" style="color:#ff4500;">48.6</div>
+          <div class="kpi-unit" style="color:#ff4500;">%</div>
+          <div class="kpi-chg" style="color:#ff4500;">2년 +72.2%p</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div style="font-size:10px; color:#444; margin-bottom:8px; letter-spacing:0.05em;">3년 추세 · OPM</div>
+        <div class="trend-line">
+          <div class="tr-pt"><span class="tr-yr">2023</span><span class="tr-val" style="color:#ef4444;">-23.6%</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2024</span><span class="tr-val" style="color:#f59e0b;">+35.4%</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2025</span><span class="tr-val" style="color:#ff4500;">+48.6%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 비용구조 -->
+    <div class="sec sk">
+      <div class="sec-num">02 · 비용구조</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">매출 100원을 다 뜯어보면</div>
+      <div class="sec-body">사업보고서 주석 26 '비용의 성격별 분류' 직접 추출.</div>
+
+      <!-- 분해 바 -->
+      <div class="breakdown-bar" style="margin-top:14px;">
+        <div class="bb-seg" style="flex:14.3; background:#e55a00;">14.3%</div>
+        <div class="bb-seg" style="flex:12.5; background:#c44f00;">12.5%</div>
+        <div class="bb-seg" style="flex:12.4; background:#a84200;">12.4%</div>
+        <div class="bb-seg" style="flex:6.9; background:#8a3600;">6.9%</div>
+        <div class="bb-seg" style="flex:2.3; background:#6b2a00;">2.3%</div>
+        <div class="bb-seg" style="flex:2.9; background:#4a1d00; font-size:8px;">기타</div>
+        <div class="bb-seg" style="flex:48.6; background:#ff4500;">영업이익 48.6%</div>
+      </div>
+      <div class="bb-legend">
+        <div class="bb-item"><div class="bb-dot" style="background:#e55a00;"></div>감가상각 14.3%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#c44f00;"></div>인건비 12.5%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#a84200;"></div>원재료 12.4%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#8a3600;"></div>R&amp;D 6.9%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#ff4500;"></div>영업이익 48.6%</div>
+      </div>
+
+      <div class="cost-list" style="margin-top:16px;">
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">감가상각</div>
+            <div class="cost-desc">EUV·M15X 팹 누적 CAPEX<br>5년 전 HBM 베팅이 지금 비용으로</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#ff4500;">14.3%</div>
+            <span class="eff-tag eff-high">효과 ★★★</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">인건비 (전사)</div>
+            <div class="cost-desc">공장+본사+R&amp;D · 32,500명</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">12.5%</div>
+            <span class="eff-tag eff-mid">효과 ★★</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">원재료·소모품</div>
+            <div class="cost-desc">웨이퍼·화학약품·가스</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">12.4%</div>
+            <span class="eff-tag eff-mid">효과 ★★</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">R&amp;D · 기술 베팅</div>
+            <div class="cost-desc">HBM4·1c·1d 개발</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#ff4500;">6.9%</div>
+            <span class="eff-tag eff-high">효과 ★★★</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">외주가공·HBM 패키징</div>
+            <div class="cost-desc">TSV·인더필 후공정</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#888;">2.3%</div>
+            <span class="eff-tag eff-low">모니터링</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 경쟁사 -->
+    <div class="sec sk">
+      <div class="sec-num">06 · 경쟁사</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">옆에 두고 보는 진짜 격차</div>
+      <div class="sec-body">Samsung·Micron과 비교했을 때 비용구조는 비슷한데 HBM 비중에서 갈려요.</div>
+
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>기업</th>
+            <th>OPM</th>
+            <th>매출(조)</th>
+            <th>R&amp;D 비중</th>
+            <th>HBM 점유</th>
+            <th>신용등급</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="comp-co" style="color:#ff4500;">SK하이닉스<small>DRAM 38.7%</small></div></td>
+            <td style="color:#ff4500; font-weight:900;">48.6%</td>
+            <td style="color:#ccc;">97.15</td>
+            <td style="color:#ccc;">6.9%</td>
+            <td style="color:#ff4500; font-weight:700;">62%</td>
+            <td style="color:#ccc;">BBB+</td>
+          </tr>
+          <tr>
+            <td><div class="comp-co" style="color:#888;">Samsung<small>메모리 사업부</small></div></td>
+            <td style="color:#f59e0b; font-weight:700;">~6%</td>
+            <td style="color:#666;">~100</td>
+            <td style="color:#666;">~11%</td>
+            <td style="color:#f59e0b;">~17%</td>
+            <td style="color:#666;">AA</td>
+          </tr>
+          <tr>
+            <td><div class="comp-co" style="color:#888;">Micron<small>DRAM ~22%</small></div></td>
+            <td style="color:#888; font-weight:700;">26.1%</td>
+            <td style="color:#666;">~50</td>
+            <td style="color:#666;">~10%</td>
+            <td style="color:#666;">신규 진입</td>
+            <td style="color:#666;">BBB</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="insight-box sub" style="background:#ff450015; border:1px solid #ff450030; margin-top:16px;">
+        <p style="color:#ff6030; font-size:14px; font-weight:700;">OPM 격차의 본질은 '비용구조'가 아니라 <span style="color:#ff4500;">HBM 비중</span>이에요.</p>
+        <p class="ib-sub" style="color:#ff450077;">Samsung은 R&amp;D 1.8배, CAPEX 2배인데도 HBM3E NVIDIA 인증이 1년 늦어서 17~20% 점유율에 갇혔어요. "원가를 줄이기"가 아니라 "더 비싼 제품 비중 늘리기"가 OPM을 만들어요.</p>
+      </div>
+    </div>
+
+    <!-- 07 ROI 시나리오 -->
+    <div class="sec sk">
+      <div class="sec-num">07 · ROI 시뮬레이션</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">3 지렛대 × 3 시나리오</div>
+      <div class="sec-body" style="margin-bottom:14px;">어디가 효과 크냐 × 어디가 쉬운가.</div>
+
+      <div style="font-size:11px; color:#555; margin-bottom:8px;">1. HBM 매출 비중 (현재 DRAM 中 30%)</div>
+      <div class="scenario-grid">
+        <div class="scenario-item">
+          <div><div class="sc-label">현재 기준</div><div class="sc-desc">HBM 비중 유지</div></div>
+          <div class="sc-val" style="color:#ff4500;">OPM 48.6%</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:#555; margin:14px 0 8px;">2. CAPEX 규모 (현재 30.2조 기준)</div>
+      <div class="scenario-grid">
+        <div class="scenario-item">
+          <div><div class="sc-label">보수 25조 (-17%)</div><div class="sc-desc">단기 +0.5%p / 장기 -2~3%p</div></div>
+          <div class="sc-val" style="color:#f59e0b;">±OPM</div>
+        </div>
+        <div class="scenario-item">
+          <div><div class="sc-label">적극 40조 (+32%)</div><div class="sc-desc">단기 -1~2%p / 장기 +3~5%p</div></div>
+          <div class="sc-val" style="color:#ff4500;">↑장기</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:#555; margin:14px 0 8px;">★ 3개월 유일 지렛대 — 3. NAND 가격 회복</div>
+      <div class="scenario-grid">
+        <div class="scenario-item" style="border-color:#ff450030;">
+          <div><div class="sc-label" style="color:#ff4500;">회복 +50% 전반</div><div class="sc-desc">2025H2 진입 시</div></div>
+          <div class="sc-val" style="color:#ff4500;">+3~4%p</div>
+        </div>
+        <div class="scenario-item" style="border-color:#ff450050;">
+          <div><div class="sc-label" style="color:#ff4500;">호황 2018 피크급</div><div class="sc-desc">2026 실현 시</div></div>
+          <div class="sc-val" style="color:#ff4500;">+5~6%p</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 투자 판단 -->
+    <div class="sec sk">
+      <div class="sec-num">09 · 투자 판단</div>
+      <div class="insight-box main" style="background:#ff4500; border-radius:10px; padding:20px 18px;">
+        <p style="font-size:22px; font-weight:900; color:#fff; letter-spacing:-0.03em; line-height:1.3;">분할 매수예요.<br>3개월 안에 움직일 하나는<br>NAND 가격이에요.</p>
+        <p class="ib-sub" style="color:rgba(255,255,255,0.65); font-size:12px; margin-top:12px;">한 방 베팅하기엔 보수(메도)·적극(매수) 둘 다 일리가 있어서요. OPM 48.6%, HBM + NVIDIA 락인은 새 종목이 열린 거라 1~2년 더 갈 수도 있어요. 시간으로 분산하면서 세 신호(2026 1Q 실적·HBM4·메모리 가격) 같이 보세요.</p>
+      </div>
+    </div>
+
+    <!-- 용어 사전 -->
+    <div class="sec sk" style="border-bottom:none;">
+      <div class="sec-num">10 · 용어 사전</div>
+      <div class="glossary">
+        <div class="gl-item">
+          <div class="gl-term" style="color:#ff4500;">NAND</div>
+          <div class="gl-def">저장용 메모리(SSD). 전원 꺼져도 유지.</div>
+        </div>
+        <div class="gl-item">
+          <div class="gl-term" style="color:#ff4500;">EUV</div>
+          <div class="gl-def">반도체 미세 공정 빛 장비. 1대 약 3,000억. ASML 독점.</div>
+        </div>
+        <div class="gl-item">
+          <div class="gl-term" style="color:#ff4500;">CAPEX</div>
+          <div class="gl-def">설비투자. 장비·공장 새로 짓는 돈. SK 2025 = 30.2조.</div>
+        </div>
+        <div class="gl-item">
+          <div class="gl-term" style="color:#ff4500;">HBM</div>
+          <div class="gl-def">AI GPU에 붙는 초고속 메모리. DDR5 단가의 4배+.</div>
+        </div>
+        <div class="gl-item">
+          <div class="gl-term" style="color:#ff4500;">1c DRAM</div>
+          <div class="gl-def">공정 노드. 1a→1b→1c→1d 순. SK가 1c 세계 최초.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <div class="source-text">출처: 사업보고서 p.51·144·145·114·32 / TrendForce·Counterpoint·KED Global<br>SK하이닉스 · 연결재무제표 기준 · 2025 사업보고서 (2026.03.17 제출)</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ② 현대자동차                              -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card-wrap" id="hd">
+  <div class="card-meta">② 현대자동차 · 스크린샷 후 업로드</div>
+  <div class="card hd">
+
+    <div class="hero" style="background:#080c12; border-bottom:1px solid #141c26;">
+      <div class="tags">
+        <span class="tag"><span class="tag-dot" style="background:#3b9eff;"></span>현대자동차</span>
+        <span class="tag" style="color:#555;">자동차 · 2025</span>
+      </div>
+      <div class="hero-hl">
+        매출 186조 신기록.<br>
+        <span style="color:#3b9eff;">수익성이 흔들렸다.</span>
+      </div>
+      <div class="hero-sub">
+        매출은 3년 연속 사상 최대를 찍었어요.<br>
+        그런데 영업이익률은 <strong>9.3% → 8.1% → 6.2%</strong>로<br>
+        3년 연속 하락 중이에요.<br><br>
+        지금 봐야 할 건 <strong>미국 관세 협상</strong>과<br>
+        <strong>전기차 전환 속도.</strong>
+      </div>
+    </div>
+
+    <div class="sec hd">
+      <div class="sec-num">01 · 결과</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">매출 ↑ 수익성 ↓ 교차점</div>
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi" style="background:#080c12;">
+          <div class="kpi-label">매출</div>
+          <div class="kpi-val" style="color:#f0f0f0;">186.3</div>
+          <div class="kpi-unit" style="color:#888;">조</div>
+          <div class="kpi-chg" style="color:#3b9eff;">+6.3% YoY · 신기록</div>
+        </div>
+        <div class="kpi" style="background:#080c12;">
+          <div class="kpi-label">영업이익</div>
+          <div class="kpi-val" style="color:#3b9eff;">11.47</div>
+          <div class="kpi-unit" style="color:#3b9eff;">조</div>
+          <div class="kpi-chg" style="color:#f59e0b;">-19.5% YoY</div>
+        </div>
+        <div class="kpi" style="background:#080c12;">
+          <div class="kpi-label">OPM</div>
+          <div class="kpi-val" style="color:#f59e0b;">6.2</div>
+          <div class="kpi-unit" style="color:#f59e0b;">%</div>
+          <div class="kpi-chg" style="color:#f59e0b;">3년 -3.1%p↓</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div style="font-size:10px; color:#444; margin-bottom:8px;">3년 추세 · OPM</div>
+        <div class="trend-line">
+          <div class="tr-pt"><span class="tr-yr">2023</span><span class="tr-val" style="color:#3b9eff;">9.3%</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2024</span><span class="tr-val" style="color:#3b9eff;">8.1%</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2025</span><span class="tr-val" style="color:#f59e0b;">6.2%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec hd">
+      <div class="sec-num">02 · 비용구조</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">매출 100원 분해</div>
+      <div class="breakdown-bar">
+        <div class="bb-seg" style="flex:81.6; background:#1a3a6a;">원가 81.6%</div>
+        <div class="bb-seg" style="flex:12.2; background:#0f2040;">판관비 12.2%</div>
+        <div class="bb-seg" style="flex:6.2; background:#3b9eff;">이익 6.2%</div>
+      </div>
+      <div class="bb-legend">
+        <div class="bb-item"><div class="bb-dot" style="background:#1a3a6a;"></div>매출원가 81.6%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#0f2040;"></div>판관비 12.2%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#3b9eff;"></div>영업이익 6.2%</div>
+      </div>
+      <div class="cost-list" style="margin-top:16px;">
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">매출원가</div>
+            <div class="cost-desc">부품·인건비·감가상각 포함<br>원자재·인센티브 확대로 상승 중</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">81.6%</div>
+            <span class="eff-tag eff-mid">관리 필요</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">R&amp;D 투자</div>
+            <div class="cost-desc">전기차·수소차·자율주행<br>전동화 전환 비용 급증</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#3b9eff;">4.3%</div>
+            <span class="eff-tag eff-watch">장기 베팅</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">미국 관세 리스크</div>
+            <div class="cost-desc">25% 관세 시 추가 비용<br>현지 생산 확대로 대응 중</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ef4444;">변수</div>
+            <span class="eff-tag eff-high">모니터링</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec hd">
+      <div class="sec-num">06 · 경쟁사</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">글로벌 완성차 OPM 비교</div>
+      <table class="comp-table">
+        <thead>
+          <tr><th>기업</th><th>OPM</th><th>매출(조)</th><th>전기차 비중</th><th>특이사항</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="comp-co" style="color:#3b9eff;">현대자동차<small>연결 기준</small></div></td>
+            <td style="color:#f59e0b; font-weight:900;">6.2%</td>
+            <td style="color:#ccc;">186.3</td>
+            <td style="color:#ccc;">~9%</td>
+            <td style="color:#666; font-size:11px;">관세 리스크</td>
+          </tr>
+          <tr>
+            <td><div class="comp-co" style="color:#888;">Toyota<small>FY2025</small></div></td>
+            <td style="color:#888; font-weight:700;">~10%</td>
+            <td style="color:#666;">~460</td>
+            <td style="color:#666;">~2%</td>
+            <td style="color:#666; font-size:11px;">HEV 강점</td>
+          </tr>
+          <tr>
+            <td><div class="comp-co" style="color:#888;">Tesla<small>2025</small></div></td>
+            <td style="color:#f59e0b; font-weight:700;">~7%</td>
+            <td style="color:#666;">~97</td>
+            <td style="color:#666;">100%</td>
+            <td style="color:#666; font-size:11px;">가격 경쟁</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="insight-box sub" style="background:#3b9eff12; border:1px solid #3b9eff25; margin-top:16px;">
+        <p style="color:#3b9eff; font-size:14px; font-weight:700;">현대차의 딜레마 — 전기차 전환 비용 vs 내연기관 수익.</p>
+        <p class="ib-sub" style="color:#3b9eff55;">전기차 비중을 늘릴수록 단기 수익성 압박이 커요. 반면 늦어지면 Toyota·Tesla에 점유율을 뺏겨요. 2026 IRA 보조금 변화와 HMGMA(조지아 공장) 가동률이 핵심이에요.</p>
+      </div>
+    </div>
+
+    <div class="sec hd">
+      <div class="sec-num">09 · 투자 판단</div>
+      <div class="insight-box main" style="background:linear-gradient(135deg,#1a3a6a,#1a4a8a); border-radius:10px; padding:20px 18px;">
+        <p style="font-size:20px; font-weight:900; color:#fff; letter-spacing:-0.03em; line-height:1.35;">매출은 역대 최대.<br>수익성 회복이 관건이에요.<br>관세 협상 결과를 먼저 보세요.</p>
+        <p class="ib-sub" style="color:rgba(255,255,255,0.55); font-size:12px; margin-top:12px;">3년 연속 OPM 하락은 구조적 압박 신호예요. 하지만 186조 매출 베이스와 미국 현지 생산 확대는 장기 방어력이 있어요. 2026년 관세 협상 진행 상황이 첫 번째 모니터링 신호예요.</p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <div class="source-text">출처: 현대자동차 사업보고서 제58기 (2026.03.18 제출) · 연결재무제표 기준</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ③ 매일유업                                -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card-wrap" id="ml">
+  <div class="card-meta">③ 매일유업 · 스크린샷 후 업로드</div>
+  <div class="card ml">
+
+    <div class="hero" style="background:#080d09; border-bottom:1px solid #141e15;">
+      <div class="tags">
+        <span class="tag"><span class="tag-dot" style="background:#22c55e;"></span>매일유업</span>
+        <span class="tag" style="color:#555;">식품 · 2025</span>
+      </div>
+      <div class="hero-hl">
+        3년 연속 성장.<br>
+        <span style="color:#22c55e;">현금 2,612억 쌓았다.</span>
+      </div>
+      <div class="hero-sub">
+        화려하지 않지만 꾸준해요.<br>
+        부채비율은 <strong>80% → 69%</strong>로 낮아지고<br>
+        현금은 <strong>1,394억 → 2,612억</strong>으로 늘었어요.<br><br>
+        전형적인 <strong>방어주 프로파일.</strong><br>
+        저금리 환경에서 빛나는 구조예요.
+      </div>
+    </div>
+
+    <div class="sec ml">
+      <div class="sec-num">01 · 결과</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">조용하지만 강한 현금 창출</div>
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi" style="background:#080d09;">
+          <div class="kpi-label">매출</div>
+          <div class="kpi-val" style="color:#f0f0f0;">1.84</div>
+          <div class="kpi-unit" style="color:#888;">조</div>
+          <div class="kpi-chg" style="color:#22c55e;">+1.8% · 3년 연속↑</div>
+        </div>
+        <div class="kpi" style="background:#080d09;">
+          <div class="kpi-label">영업이익</div>
+          <div class="kpi-val" style="color:#22c55e;">600</div>
+          <div class="kpi-unit" style="color:#22c55e;">억</div>
+          <div class="kpi-chg" style="color:#f59e0b;">-14.6% YoY</div>
+        </div>
+        <div class="kpi" style="background:#080d09;">
+          <div class="kpi-label">부채비율</div>
+          <div class="kpi-val" style="color:#22c55e;">68.9</div>
+          <div class="kpi-unit" style="color:#22c55e;">%</div>
+          <div class="kpi-chg" style="color:#22c55e;">3년 -11.2%p↓</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div style="font-size:10px; color:#444; margin-bottom:8px;">3년 추세 · 현금성 자산 (억원)</div>
+        <div class="trend-line">
+          <div class="tr-pt"><span class="tr-yr">2023</span><span class="tr-val" style="color:#22c55e;">1,394억</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2024</span><span class="tr-val" style="color:#22c55e;">1,997억</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2025</span><span class="tr-val" style="color:#22c55e;">2,612억</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec ml">
+      <div class="sec-num">02 · 비용구조</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">매출 100원 분해</div>
+      <div class="breakdown-bar">
+        <div class="bb-seg" style="flex:65; background:#1a3d1a;">원가 65%</div>
+        <div class="bb-seg" style="flex:31.7; background:#0f260f;">판관비 31.7%</div>
+        <div class="bb-seg" style="flex:3.3; background:#22c55e;">이익 3.3%</div>
+      </div>
+      <div class="bb-legend">
+        <div class="bb-item"><div class="bb-dot" style="background:#1a3d1a;"></div>매출원가 65%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#0f260f;"></div>판관비 31.7%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#22c55e;"></div>영업이익 3.3%</div>
+      </div>
+      <div class="cost-list" style="margin-top:16px;">
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">원재료 (원유·분유)</div>
+            <div class="cost-desc">국제 원유가·환율 연동<br>2025년 원가 상승 압박</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">~40%</div>
+            <span class="eff-tag eff-mid">모니터링</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">판매관리비</div>
+            <div class="cost-desc">마케팅·물류·인건비<br>프리미엄 채널 확대 투자</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">31.7%</div>
+            <span class="eff-tag eff-low">안정</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">현금성 자산 운용</div>
+            <div class="cost-desc">단기금융상품·예금 보유<br>이자수익으로 순이익 방어</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#22c55e;">강점</div>
+            <span class="eff-tag eff-high">효과 ★★★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec ml">
+      <div class="sec-num">06 · 포지셔닝</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">방어주로서의 재무 건전성</div>
+      <div class="kpi-row kpi-row-2" style="margin-bottom:16px;">
+        <div class="kpi" style="background:#080d09;">
+          <div class="kpi-label">자산총계</div>
+          <div class="kpi-val" style="color:#22c55e; font-size:22px;">10,659</div>
+          <div class="kpi-unit" style="color:#22c55e;">억원</div>
+          <div class="kpi-chg" style="color:#22c55e;">+3.9% YoY</div>
+        </div>
+        <div class="kpi" style="background:#080d09;">
+          <div class="kpi-label">이익잉여금</div>
+          <div class="kpi-val" style="color:#22c55e; font-size:22px;">3,941</div>
+          <div class="kpi-unit" style="color:#22c55e;">억원</div>
+          <div class="kpi-chg" style="color:#22c55e;">꾸준히 누적 중</div>
+        </div>
+      </div>
+      <div class="insight-box sub" style="background:#22c55e12; border:1px solid #22c55e25;">
+        <p style="color:#22c55e; font-size:14px; font-weight:700;">영업이익은 줄었지만 현금은 오히려 늘고 있어요.</p>
+        <p class="ib-sub" style="color:#22c55e55;">감가상각 비현금 항목 제외 시 실제 현금창출력(EBITDA)은 영업이익보다 높아요. 부채비율 68.9%는 식품업계 최저 수준 중 하나예요. 경기 침체기 방어주로 주목받는 구조예요.</p>
+      </div>
+    </div>
+
+    <div class="sec ml" style="border-bottom:none;">
+      <div class="sec-num">09 · 투자 판단</div>
+      <div class="insight-box main" style="background:linear-gradient(135deg,#14532d,#166534); border-radius:10px; padding:20px 18px;">
+        <p style="font-size:20px; font-weight:900; color:#fff; letter-spacing:-0.03em; line-height:1.35;">변동성 장세에서<br>현금흐름 보고 싶다면<br>여기예요.</p>
+        <p class="ib-sub" style="color:rgba(255,255,255,0.55); font-size:12px; margin-top:12px;">화려한 성장주는 아니에요. 하지만 3년 연속 매출 성장 + 현금 축적 + 부채 감소는 불황에 강한 구조예요. 원유 가격·환율이 핵심 모니터링 지표예요.</p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <div class="source-text">출처: 매일유업 사업보고서 제9기 (2026.03.19 제출) · 연결재무제표 기준</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ④ 한샘                                   -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card-wrap" id="hs">
+  <div class="card-meta">④ 한샘 · 스크린샷 후 업로드</div>
+  <div class="card hs">
+
+    <div class="hero" style="background:#09080f; border-bottom:1px solid #171226;">
+      <div class="tags">
+        <span class="tag"><span class="tag-dot" style="background:#a855f7;"></span>한샘</span>
+        <span class="tag" style="color:#555;">인테리어 · 2025</span>
+      </div>
+      <div class="hero-hl">
+        3년 만에 적자 탈출.<br>
+        <span style="color:#a855f7;">부채 1,234억 줄였다.</span>
+      </div>
+      <div class="hero-sub">
+        2023년 <strong>-622억 적자</strong>였던 회사가<br>
+        2025년 <strong>+463억 흑자</strong>로 돌아왔어요.<br><br>
+        부동산이 살아나면 더 크게 튀어요.<br>
+        지금 봐야 할 건 <strong>서울 아파트 거래량.</strong>
+      </div>
+    </div>
+
+    <div class="sec hs">
+      <div class="sec-num">01 · 결과</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">흑자 전환 + 재무구조 개선</div>
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi" style="background:#09080f;">
+          <div class="kpi-label">매출</div>
+          <div class="kpi-val" style="color:#f0f0f0;">1.74</div>
+          <div class="kpi-unit" style="color:#888;">조</div>
+          <div class="kpi-chg" style="color:#f59e0b;">-8.6% YoY</div>
+        </div>
+        <div class="kpi" style="background:#09080f;">
+          <div class="kpi-label">당기순이익</div>
+          <div class="kpi-val" style="color:#a855f7;">463</div>
+          <div class="kpi-unit" style="color:#a855f7;">억</div>
+          <div class="kpi-chg" style="color:#a855f7;">흑자전환 ✓</div>
+        </div>
+        <div class="kpi" style="background:#09080f;">
+          <div class="kpi-label">부채비율</div>
+          <div class="kpi-val" style="color:#a855f7;">148</div>
+          <div class="kpi-unit" style="color:#a855f7;">%</div>
+          <div class="kpi-chg" style="color:#a855f7;">2년 -59%p↓</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div style="font-size:10px; color:#444; margin-bottom:8px;">3년 추세 · 당기순이익 (억원)</div>
+        <div class="trend-line">
+          <div class="tr-pt"><span class="tr-yr">2023</span><span class="tr-val" style="color:#ef4444;">-622억</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2024</span><span class="tr-val" style="color:#f59e0b;">+1,511억</span></div>
+          <span class="tr-arr">→</span>
+          <div class="tr-pt"><span class="tr-yr">2025</span><span class="tr-val" style="color:#a855f7;">+463억</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec hs">
+      <div class="sec-num">02 · 비용구조</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">매출 100원 분해</div>
+      <div class="breakdown-bar">
+        <div class="bb-seg" style="flex:75; background:#2d1a4d;">원가 75%</div>
+        <div class="bb-seg" style="flex:23.9; background:#1e1030;">판관비 23.9%</div>
+        <div class="bb-seg" style="flex:1.1; background:#a855f7; font-size:9px;">이익</div>
+      </div>
+      <div class="bb-legend">
+        <div class="bb-item"><div class="bb-dot" style="background:#2d1a4d;"></div>매출원가 75%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#1e1030;"></div>판관비 23.9%</div>
+        <div class="bb-item"><div class="bb-dot" style="background:#a855f7;"></div>영업이익 1.1%</div>
+      </div>
+      <div class="cost-list" style="margin-top:16px;">
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">매출원가</div>
+            <div class="cost-desc">가구·자재 원가 + 시공비<br>원자재 가격 안정화 진행 중</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct" style="color:#ccc;">75%</div>
+            <span class="eff-tag eff-mid">개선 중</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">구조조정 효과</div>
+            <div class="cost-desc">인력·점포 축소<br>고정비 절감으로 흑자 전환</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#a855f7;">핵심</div>
+            <span class="eff-tag eff-high">효과 ★★★</span>
+          </div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-left">
+            <div class="cost-name">부동산 연동 매출</div>
+            <div class="cost-desc">아파트 입주·리모델링 수요<br>거래량 회복 시 레버리지↑</div>
+          </div>
+          <div class="cost-right">
+            <div class="cost-pct acc" style="color:#a855f7;">변수</div>
+            <span class="eff-tag eff-watch">모니터링</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec hs">
+      <div class="sec-num">06 · 구조적 포지션</div>
+      <div class="sec-title" style="color:#f0f0f0; font-size:20px;">부동산이 살아나면 레버리지</div>
+      <div class="kpi-row kpi-row-2" style="margin-bottom:16px;">
+        <div class="kpi" style="background:#09080f;">
+          <div class="kpi-label">부채총계 감소</div>
+          <div class="kpi-val" style="color:#a855f7; font-size:22px;">-1,234</div>
+          <div class="kpi-unit" style="color:#a855f7;">억원</div>
+          <div class="kpi-chg" style="color:#a855f7;">23→25년 2년 누적</div>
+        </div>
+        <div class="kpi" style="background:#09080f;">
+          <div class="kpi-label">자본총계 증가</div>
+          <div class="kpi-val" style="color:#a855f7; font-size:22px;">+570</div>
+          <div class="kpi-unit" style="color:#a855f7;">억원</div>
+          <div class="kpi-chg" style="color:#a855f7;">2년 누적 자본 확충</div>
+        </div>
+      </div>
+      <div class="insight-box sub" style="background:#a855f712; border:1px solid #a855f725;">
+        <p style="color:#c084fc; font-size:14px; font-weight:700;">매출 하락 속 흑자 전환 — 구조조정이 먼저 통했어요.</p>
+        <p class="ib-sub" style="color:#a855f755;">매출이 줄었는데도 흑자가 된 건 비용 절감 효과가 먼저 나타났기 때문이에요. 부동산 거래량이 본격 회복하면 매출 반등 + 고정비 레버리지가 동시에 작동해요. 2024년 순이익 1,511억은 자산 처분 이익 포함 — 반복 가능한 수익인지 확인이 필요해요.</p>
+      </div>
+    </div>
+
+    <div class="sec hs" style="border-bottom:none;">
+      <div class="sec-num">09 · 투자 판단</div>
+      <div class="insight-box main" style="background:linear-gradient(135deg,#3b0764,#4c1d95); border-radius:10px; padding:20px 18px;">
+        <p style="font-size:20px; font-weight:900; color:#fff; letter-spacing:-0.03em; line-height:1.35;">지금은 관찰 구간이에요.<br>서울 아파트 거래량이<br>트리거예요.</p>
+        <p class="ib-sub" style="color:rgba(255,255,255,0.55); font-size:12px; margin-top:12px;">흑자 전환과 재무 개선은 확인됐어요. 하지만 본격적인 매출 반등은 부동산 사이클에 달려 있어요. 월간 서울 아파트 거래량 5,000건 이상이 지속되면 매수 시그널로 봐요.</p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <div class="source-text">출처: 한샘 사업보고서 제53기 (2026.03.19 제출) · 연결재무제표 기준</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(id, btn) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

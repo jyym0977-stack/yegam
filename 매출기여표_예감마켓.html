@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예감마켓 매출 기여표</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      padding: 60px 48px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── 섹션 래퍼 ── */
+    .section {
+      margin-bottom: 80px;
+    }
+
+    /* ── 제목 ── */
+    .title {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 36px;
+    }
+
+    /* ── 기초 지표 박스 ── */
+    .info-box {
+      background: #f7f7f7;
+      border-radius: 10px;
+      padding: 20px 24px 24px;
+      margin-bottom: 36px;
+    }
+
+    .info-box-label {
+      font-size: 10px;
+      color: #bbb;
+      margin-bottom: 18px;
+      letter-spacing: 0.3px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      row-gap: 20px;
+    }
+
+    .info-item .lbl {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .info-item .val {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── 테이블 ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      border-top: 2px solid #1a1a1a;
+      border-bottom: 1.5px solid #1a1a1a;
+    }
+
+    th {
+      padding: 12px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      text-align: left;
+    }
+
+    th:last-child { text-align: right; }
+
+    tbody tr {
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    tbody tr:last-child {
+      border-bottom: 2px solid #1a1a1a;
+    }
+
+    td {
+      padding: 20px 12px;
+      font-size: 14px;
+      color: #444;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    td:last-child {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a1a1a;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════
+       1. 커머스 매출 기여표
+  ════════════════════════════════ -->
+  <div class="section">
+
+    <div class="title">커머스 매출 기여표</div>
+    <div class="subtitle">
+      (각 숫자언어를 20%씩 개선했을 때 &nbsp;·&nbsp; 월 매출 기준 &nbsp;·&nbsp; 예감마켓 스마트스토어 / 공동구매 가정)
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">기초 지표 · 시뮬레이션 기준</div>
+      <div class="info-grid">
+        <div class="info-item"><div class="lbl">월 매출</div><div class="val">3,000만원</div></div>
+        <div class="info-item"><div class="lbl">알림신청 인원</div><div class="val">600명</div></div>
+        <div class="info-item"><div class="lbl">구매 전환율</div><div class="val">6%</div></div>
+        <div class="info-item"><div class="lbl">객단가</div><div class="val">30,000원</div></div>
+        <div class="info-item"><div class="lbl">월 주문건수</div><div class="val">1,000건</div></div>
+        <div class="info-item"><div class="lbl">재구매율</div><div class="val">35%</div></div>
+        <div class="info-item"><div class="lbl">월 공구 횟수</div><div class="val">1회</div></div>
+        <div class="info-item"><div class="lbl">공구 참여 인원</div><div class="val">300명</div></div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">숫자언어</th>
+          <th style="width:20%">기존 숫자</th>
+          <th style="width:20%">개선 숫자</th>
+          <th style="width:22%">매출 기여</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>객단가</td>
+          <td>30,000원</td>
+          <td>36,000원</td>
+          <td>+600만원</td>
+        </tr>
+        <tr>
+          <td>알림→공구 전환율</td>
+          <td>50%</td>
+          <td>60%</td>
+          <td>+180만원</td>
+        </tr>
+        <tr>
+          <td>알림신청 인원</td>
+          <td>600명</td>
+          <td>720명</td>
+          <td>+120만원</td>
+        </tr>
+        <tr>
+          <td>재구매율</td>
+          <td>35%</td>
+          <td>42%</td>
+          <td>+210만원</td>
+        </tr>
+        <tr>
+          <td>공구 참여 인원</td>
+          <td>300명</td>
+          <td>360명</td>
+          <td>+180만원</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+
+  <!-- ════════════════════════════════
+       2. 협업 매출 기여표
+  ════════════════════════════════ -->
+  <div class="section">
+
+    <div class="title">협업 매출 기여표</div>
+    <div class="subtitle">
+      (각 숫자언어를 20%씩 개선했을 때 &nbsp;·&nbsp; 월 수입 기준 &nbsp;·&nbsp; 예감마켓 브랜드 협업 / B2B 가정)
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">기초 지표 · 시뮬레이션 기준</div>
+      <div class="info-grid">
+        <div class="info-item"><div class="lbl">월 협업 수입</div><div class="val">400만원</div></div>
+        <div class="info-item"><div class="lbl">월 협업 제안 수</div><div class="val">8건</div></div>
+        <div class="info-item"><div class="lbl">계약 전환율</div><div class="val">25%</div></div>
+        <div class="info-item"><div class="lbl">건당 협업 단가</div><div class="val">200만원</div></div>
+        <div class="info-item"><div class="lbl">월 활성 협업</div><div class="val">2건</div></div>
+        <div class="info-item"><div class="lbl">재협업율</div><div class="val">40%</div></div>
+        <div class="info-item"><div class="lbl">콘텐츠 수수료율</div><div class="val">15%</div></div>
+        <div class="info-item"><div class="lbl">팔로워 기반 단가</div><div class="val">상승 여력 有</div></div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">숫자언어</th>
+          <th style="width:20%">기존 숫자</th>
+          <th style="width:20%">개선 숫자</th>
+          <th style="width:22%">매출 기여</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>건당 협업 단가</td>
+          <td>200만원</td>
+          <td>240만원</td>
+          <td>+80만원</td>
+        </tr>
+        <tr>
+          <td>계약 전환율</td>
+          <td>25%</td>
+          <td>30%</td>
+          <td>+80만원</td>
+        </tr>
+        <tr>
+          <td>월 협업 제안 수</td>
+          <td>8건</td>
+          <td>9.6건</td>
+          <td>+80만원</td>
+        </tr>
+        <tr>
+          <td>재협업율</td>
+          <td>40%</td>
+          <td>48%</td>
+          <td>+80만원</td>
+        </tr>
+        <tr>
+          <td>콘텐츠 수수료율</td>
+          <td>15%</td>
+          <td>18%</td>
+          <td>+60만원</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</body>
+</html>

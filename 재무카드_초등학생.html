@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기업 재무 — 초등학생 교육 자료</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #f0f4ff;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    padding: 70px 20px 60px;
+  }
+
+  /* ─── 네비 ─── */
+  .nav {
+    position: fixed; top:0; left:0; right:0;
+    background: #fff;
+    border-bottom: 3px solid #e0e7ff;
+    padding: 10px 20px;
+    display: flex; gap: 8px; align-items: center;
+    z-index: 999; overflow-x: auto;
+  }
+  .nav-label { font-size: 12px; color: #aaa; white-space: nowrap; }
+  .nav-btn {
+    border: 2px solid #e0e7ff; background: #fff; color: #888;
+    border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
+  }
+  .nav-btn:hover { background: #f0f4ff; }
+  .nav-btn.active { color: #fff; border-color: transparent; }
+  .nav-btn.sk.active  { background: #f97316; }
+  .nav-btn.hd.active  { background: #3b82f6; }
+  .nav-btn.ml.active  { background: #22c55e; }
+  .nav-btn.hs.active  { background: #a855f7; }
+
+  /* ─── 카드 ─── */
+  .card-wrap { width: 390px; }
+  .card-meta { font-size: 11px; color: #aaa; text-align: center; margin-bottom: 8px; }
+  .card { width: 390px; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); }
+
+  /* ─── 섹션 공통 ─── */
+  .sec { padding: 24px 24px; border-bottom: 2px dashed; }
+  .sec:last-child { border-bottom: none; }
+
+  /* ─── HERO ─── */
+  .hero { padding: 32px 24px 24px; }
+  .company-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 50px; padding: 6px 16px; font-size: 13px; font-weight: 900;
+    margin-bottom: 20px;
+  }
+  .hero-emoji { font-size: 56px; text-align: center; display: block; margin-bottom: 14px; }
+  .hero-title { font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -0.03em; }
+  .hero-sub { font-size: 14px; line-height: 1.75; margin-top: 12px; opacity: 0.75; }
+
+  /* ─── 개념 설명 카드 ─── */
+  .concept-box {
+    border-radius: 16px; padding: 16px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .concept-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+  .concept-title { font-size: 14px; font-weight: 900; margin-bottom: 4px; }
+  .concept-body { font-size: 13px; line-height: 1.6; opacity: 0.8; }
+
+  /* ─── 비율 시각화 (동전 그래프) ─── */
+  .coin-bar { display: flex; height: 44px; border-radius: 12px; overflow: hidden; gap: 3px; margin: 14px 0; }
+  .coin-seg {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #fff;
+    border-radius: 8px;
+  }
+  .coin-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+  .cl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; }
+  .cl-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ─── KPI 박스 ─── */
+  .kpi-grid { display: grid; gap: 10px; }
+  .kpi-3 { grid-template-columns: repeat(3,1fr); }
+  .kpi-2 { grid-template-columns: repeat(2,1fr); }
+  .kpi-box {
+    border-radius: 16px; padding: 14px 12px; text-align: center;
+  }
+  .kpi-emoji { font-size: 22px; margin-bottom: 4px; }
+  .kpi-label { font-size: 11px; font-weight: 700; opacity: 0.6; margin-bottom: 4px; }
+  .kpi-val { font-size: 24px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+  .kpi-unit { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .kpi-desc { font-size: 10px; margin-top: 6px; opacity: 0.6; line-height: 1.4; }
+
+  /* ─── 비유 섹션 ─── */
+  .analogy-wrap { display: flex; gap: 10px; align-items: stretch; margin-top: 14px; }
+  .analogy-box {
+    flex: 1; border-radius: 14px; padding: 14px;
+  }
+  .analogy-title { font-size: 12px; font-weight: 900; margin-bottom: 8px; opacity: 0.7; }
+  .analogy-body { font-size: 13px; font-weight: 700; line-height: 1.5; }
+  .analogy-arrow {
+    display: flex; align-items: center; font-size: 22px; color: #ccc; flex-shrink: 0;
+  }
+
+  /* ─── 퀴즈 ─── */
+  .quiz-box {
+    border-radius: 16px; padding: 18px 16px;
+  }
+  .quiz-q { font-size: 15px; font-weight: 900; margin-bottom: 12px; line-height: 1.4; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .quiz-opt:hover { transform: translateX(4px); }
+  .quiz-opt.correct { border-color: #22c55e !important; background: #dcfce7 !important; color: #15803d !important; }
+  .quiz-opt.wrong { border-color: #ef4444 !important; background: #fee2e2 !important; color: #b91c1c !important; }
+  .quiz-result { margin-top: 12px; font-size: 13px; font-weight: 700; display: none; padding: 10px 14px; border-radius: 10px; }
+
+  /* ─── 핵심 메시지 박스 ─── */
+  .msg-box {
+    border-radius: 18px; padding: 22px 18px; text-align: center;
+    margin-top: 0;
+  }
+  .msg-emoji { font-size: 40px; margin-bottom: 10px; display: block; }
+  .msg-title { font-size: 20px; font-weight: 900; line-height: 1.3; margin-bottom: 8px; }
+  .msg-body { font-size: 13px; line-height: 1.7; opacity: 0.85; }
+
+  /* ─── 용어 카드 ─── */
+  .term-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .term-item {
+    border-radius: 12px; padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .term-emoji { font-size: 20px; flex-shrink: 0; }
+  .term-word { font-size: 14px; font-weight: 900; margin-bottom: 3px; }
+  .term-def { font-size: 12px; line-height: 1.5; opacity: 0.75; }
+
+  /* ─── 섹션 제목 ─── */
+  .sec-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 50px; padding: 4px 12px; font-size: 11px; font-weight: 900;
+    margin-bottom: 12px;
+  }
+  .sec-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; line-height: 1.3; }
+  .sec-body { font-size: 13px; line-height: 1.7; opacity: 0.75; }
+
+  /* ─── 비교 표 ─── */
+  .simple-table { width: 100%; border-collapse: collapse; margin-top: 12px; border-radius: 12px; overflow: hidden; }
+  .simple-table th { font-size: 11px; font-weight: 900; padding: 8px 10px; text-align: center; }
+  .simple-table td { font-size: 13px; padding: 10px; text-align: center; border-top: 1px solid rgba(0,0,0,0.06); }
+  .simple-table td:first-child { text-align: left; font-weight: 700; }
+
+  /* ══════ 회사별 컬러 ══════ */
+  /* SK하이닉스 — 오렌지 */
+  .sk .hero { background: linear-gradient(135deg, #fff7ed, #ffedd5); }
+  .sk .sec { background: #fff; border-color: #fed7aa; }
+  .sk .sec:nth-child(even) { background: #fff7ed; }
+  .sk .company-badge { background: #f97316; color: #fff; }
+  .sk .concept-box { background: #fff7ed; }
+  .sk .concept-title { color: #ea580c; }
+  .sk .kpi-box { background: #fff7ed; }
+  .sk .kpi-val { color: #f97316; }
+  .sk .sec-badge { background: #ffedd5; color: #ea580c; }
+  .sk .quiz-box { background: #fff7ed; border: 2px solid #fed7aa; }
+  .sk .quiz-opt { background: #fff; border-color: #fed7aa; color: #444; }
+  .sk .msg-box { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+  .sk .analogy-box:first-child { background: #fff7ed; }
+  .sk .analogy-box:last-child { background: #ffedd5; }
+  .sk .term-item { background: #fff7ed; }
+  .sk .term-word { color: #ea580c; }
+  .sk .simple-table th { background: #f97316; color: #fff; }
+  .sk .simple-table td { background: #fff; }
+
+  /* 현대자동차 — 블루 */
+  .hd .hero { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+  .hd .sec { background: #fff; border-color: #bfdbfe; }
+  .hd .sec:nth-child(even) { background: #eff6ff; }
+  .hd .company-badge { background: #3b82f6; color: #fff; }
+  .hd .concept-box { background: #eff6ff; }
+  .hd .concept-title { color: #2563eb; }
+  .hd .kpi-box { background: #eff6ff; }
+  .hd .kpi-val { color: #3b82f6; }
+  .hd .sec-badge { background: #dbeafe; color: #2563eb; }
+  .hd .quiz-box { background: #eff6ff; border: 2px solid #bfdbfe; }
+  .hd .quiz-opt { background: #fff; border-color: #bfdbfe; color: #444; }
+  .hd .msg-box { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; }
+  .hd .analogy-box:first-child { background: #eff6ff; }
+  .hd .analogy-box:last-child { background: #dbeafe; }
+  .hd .term-item { background: #eff6ff; }
+  .hd .term-word { color: #2563eb; }
+  .hd .simple-table th { background: #3b82f6; color: #fff; }
+  .hd .simple-table td { background: #fff; }
+
+  /* 매일유업 — 그린 */
+  .ml .hero { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+  .ml .sec { background: #fff; border-color: #bbf7d0; }
+  .ml .sec:nth-child(even) { background: #f0fdf4; }
+  .ml .company-badge { background: #22c55e; color: #fff; }
+  .ml .concept-box { background: #f0fdf4; }
+  .ml .concept-title { color: #16a34a; }
+  .ml .kpi-box { background: #f0fdf4; }
+  .ml .kpi-val { color: #22c55e; }
+  .ml .sec-badge { background: #dcfce7; color: #16a34a; }
+  .ml .quiz-box { background: #f0fdf4; border: 2px solid #bbf7d0; }
+  .ml .quiz-opt { background: #fff; border-color: #bbf7d0; color: #444; }
+  .ml .msg-box { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+  .ml .analogy-box:first-child { background: #f0fdf4; }
+  .ml .analogy-box:last-child { background: #dcfce7; }
+  .ml .term-item { background: #f0fdf4; }
+  .ml .term-word { color: #16a34a; }
+  .ml .simple-table th { background: #22c55e; color: #fff; }
+  .ml .simple-table td { background: #fff; }
+
+  /* 한샘 — 퍼플 */
+  .hs .hero { background: linear-gradient(135deg, #faf5ff, #ede9fe); }
+  .hs .sec { background: #fff; border-color: #ddd6fe; }
+  .hs .sec:nth-child(even) { background: #faf5ff; }
+  .hs .company-badge { background: #a855f7; color: #fff; }
+  .hs .concept-box { background: #faf5ff; }
+  .hs .concept-title { color: #7c3aed; }
+  .hs .kpi-box { background: #faf5ff; }
+  .hs .kpi-val { color: #a855f7; }
+  .hs .sec-badge { background: #ede9fe; color: #7c3aed; }
+  .hs .quiz-box { background: #faf5ff; border: 2px solid #ddd6fe; }
+  .hs .quiz-opt { background: #fff; border-color: #ddd6fe; color: #444; }
+  .hs .msg-box { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; }
+  .hs .analogy-box:first-child { background: #faf5ff; }
+  .hs .analogy-box:last-child { background: #ede9fe; }
+  .hs .term-item { background: #faf5ff; }
+  .hs .term-word { color: #7c3aed; }
+  .hs .simple-table th { background: #a855f7; color: #fff; }
+  .hs .simple-table td { background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="nav-label">📚 선택 →</span>
+  <button class="nav-btn sk active" onclick="go('sk',this)">🔶 SK하이닉스</button>
+  <button class="nav-btn hd" onclick="go('hd',this)">🔷 현대자동차</button>
+  <button class="nav-btn ml" onclick="go('ml',this)">🟩 매일유업</button>
+  <button class="nav-btn hs" onclick="go('hs',this)">🟪 한샘</button>
+</div>
+
+
+<!-- ════════════════════════════ -->
+<!--  ① SK하이닉스               -->
+<!-- ════════════════════════════ -->
+<div class="card-wrap" id="sk">
+  <div class="card-meta">① SK하이닉스</div>
+  <div class="card sk">
+
+    <!-- HERO -->
+    <div class="hero">
+      <span class="company-badge">🔶 SK하이닉스</span>
+      <span class="hero-emoji">🤖💾</span>
+      <div class="hero-title" style="color:#ea580c;">AI 로봇의 기억을<br>만드는 회사예요!</div>
+      <div class="hero-sub" style="color:#9a3412;">
+        컴퓨터가 뭔가를 기억하려면 특별한 부품이 필요해요.<br>
+        그게 바로 <strong>반도체 메모리</strong>예요.<br>
+        SK하이닉스는 그 부품을 세계에서 가장 잘 만들어요! 🌍
+      </div>
+    </div>
+
+    <!-- 회사가 하는 일 -->
+    <div class="sec">
+      <span class="sec-badge">💡 이 회사는 뭘 해요?</span>
+      <div class="concept-box">
+        <div class="concept-icon">🧠</div>
+        <div>
+          <div class="concept-title">HBM — AI의 뇌</div>
+          <div class="concept-body">ChatGPT 같은 AI가 생각할 때 쓰는 초고속 메모리예요. 일반 메모리보다 <strong>4배 더 빨라요!</strong></div>
+        </div>
+      </div>
+      <div class="concept-box">
+        <div class="concept-icon">💿</div>
+        <div>
+          <div class="concept-title">NAND — 컴퓨터의 서랍</div>
+          <div class="concept-body">사진, 영상, 파일을 저장하는 메모리예요. 전원을 꺼도 내용이 남아요!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 매출 100원 비유 -->
+    <div class="sec">
+      <span class="sec-badge">💰 100원 팔면 얼마 남아요?</span>
+      <div class="sec-title">100원 팔았더니<br>48.6원이 남았어요! 🎉</div>
+
+      <div class="coin-bar">
+        <div class="coin-seg" style="flex:14.3; background:#f97316;">14.3</div>
+        <div class="coin-seg" style="flex:12.5; background:#fb923c;">12.5</div>
+        <div class="coin-seg" style="flex:12.4; background:#fdba74;">12.4</div>
+        <div class="coin-seg" style="flex:6.9; background:#fed7aa; color:#ea580c;">6.9</div>
+        <div class="coin-seg" style="flex:5.3; background:#ffedd5; color:#ea580c; font-size:9px;">기타</div>
+        <div class="coin-seg" style="flex:48.6; background:#16a34a; font-size:13px;">💚 48.6원!</div>
+      </div>
+      <div class="coin-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:#f97316;"></div>장비 비용 14.3원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#fb923c;"></div>직원 월급 12.5원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#fdba74;"></div>재료 값 12.4원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#fed7aa;"></div>연구비 6.9원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#16a34a;"></div>남은 돈 48.6원 ✨</div>
+      </div>
+
+      <div style="background:#fff7ed; border-radius:14px; padding:14px; margin-top:14px; font-size:13px; line-height:1.7; color:#9a3412;">
+        🍕 <strong>피자 비유:</strong> 피자 한 판에 10,000원 받았는데<br>
+        재료·인건비 쓰고도 <strong>4,860원</strong>이 남은 거예요.<br>
+        피자 가게 중에 <strong>최고 수익률</strong>이에요! 🏆
+      </div>
+    </div>
+
+    <!-- 숫자 카드 -->
+    <div class="sec">
+      <span class="sec-badge">📊 2025년 성적표</span>
+      <div class="kpi-grid kpi-3">
+        <div class="kpi-box">
+          <div class="kpi-emoji">💰</div>
+          <div class="kpi-label">총 판매 금액</div>
+          <div class="kpi-val">97조</div>
+          <div class="kpi-unit" style="color:#f97316;">원</div>
+          <div class="kpi-desc">1조 = 1,000,000,000,000원!</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">🤑</div>
+          <div class="kpi-label">남긴 돈</div>
+          <div class="kpi-val">47조</div>
+          <div class="kpi-unit" style="color:#f97316;">원</div>
+          <div class="kpi-desc">작년보다 2배나 늘었어요!</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">📈</div>
+          <div class="kpi-label">이익률</div>
+          <div class="kpi-val">48.6</div>
+          <div class="kpi-unit" style="color:#f97316;">%</div>
+          <div class="kpi-desc">세계 TOP 수준!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 비교 -->
+    <div class="sec">
+      <span class="sec-badge">🏁 친구들이랑 비교해볼까요?</span>
+      <table class="simple-table">
+        <thead>
+          <tr><th>회사</th><th>나라</th><th>100원 팔면?</th><th>등수</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>🔶 SK하이닉스</td><td>🇰🇷 한국</td><td style="color:#16a34a; font-weight:900;">48.6원 남음</td><td>🥇 1등!</td></tr>
+          <tr><td>🔵 Micron</td><td>🇺🇸 미국</td><td style="color:#f59e0b; font-weight:700;">26.1원 남음</td><td>🥈 2등</td></tr>
+          <tr><td>⬜ Samsung</td><td>🇰🇷 한국</td><td style="color:#888; font-weight:700;">약 6원 남음</td><td>🥉 3등</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px; font-size:12px; color:#9a3412; background:#fff7ed; border-radius:10px; padding:10px 12px; line-height:1.6;">
+        💬 삼성이 더 큰 회사인데 왜 적게 남아요?<br>
+        → AI용 HBM 메모리를 SK하이닉스가 먼저 잘 만들었기 때문이에요!
+      </div>
+    </div>
+
+    <!-- 퀴즈 -->
+    <div class="sec">
+      <span class="sec-badge">🎯 퀴즈 타임!</span>
+      <div class="quiz-box">
+        <div class="quiz-q">SK하이닉스가 100원어치 메모리를 팔면<br>얼마가 남을까요?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="quiz(this,'wrong','sk1')" data-id="sk1">① 약 5원</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','sk1')" data-id="sk1">② 약 20원</div>
+          <div class="quiz-opt" onclick="quiz(this,'correct','sk1')" data-id="sk1">③ 약 48.6원 🎉</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','sk1')" data-id="sk1">④ 약 90원</div>
+        </div>
+        <div class="quiz-result" id="res-sk1-correct" style="background:#dcfce7; color:#15803d;">
+          🎉 정답! 48.6원이에요! 100원 팔면 절반 가까이 남는 대단한 회사예요!
+        </div>
+        <div class="quiz-result" id="res-sk1-wrong" style="background:#fee2e2; color:#b91c1c;">
+          😅 아쉬워요! 정답은 ③ 48.6원이에요. 다시 도전해봐요!
+        </div>
+      </div>
+    </div>
+
+    <!-- 핵심 메시지 -->
+    <div class="sec" style="border:none; padding-bottom:0;">
+      <div class="msg-box" style="background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;">
+        <span class="msg-emoji">🏆</span>
+        <div class="msg-title">SK하이닉스는<br>AI 시대의 숨은 왕자예요!</div>
+        <div class="msg-body">ChatGPT, 구글 AI, 로봇… 모두 SK하이닉스의 메모리 없이는 작동 못해요. AI 세상이 커질수록 이 회사도 커져요!</div>
+      </div>
+    </div>
+
+    <!-- 용어 정리 -->
+    <div class="sec" style="border:none;">
+      <span class="sec-badge">📖 오늘 배운 단어</span>
+      <div class="term-list">
+        <div class="term-item">
+          <div class="term-emoji">💾</div>
+          <div><div class="term-word">메모리 반도체</div><div class="term-def">컴퓨터가 정보를 기억하는 부품. 우리 뇌의 기억력 같은 거예요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">🤑</div>
+          <div><div class="term-word">영업이익률</div><div class="term-def">100원 팔았을 때 얼마나 남는지 비율. 높을수록 돈을 잘 버는 회사예요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">🔬</div>
+          <div><div class="term-word">HBM</div><div class="term-def">AI에 쓰이는 초고속 메모리. 일반 메모리보다 훨씬 빠르고 비싸요!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════ -->
+<!--  ② 현대자동차               -->
+<!-- ════════════════════════════ -->
+<div class="card-wrap" id="hd">
+  <div class="card-meta">② 현대자동차</div>
+  <div class="card hd">
+
+    <div class="hero">
+      <span class="company-badge">🔷 현대자동차</span>
+      <span class="hero-emoji">🚗⚡</span>
+      <div class="hero-title" style="color:#2563eb;">우리나라를 대표하는<br>자동차 회사예요!</div>
+      <div class="hero-sub" style="color:#1e40af;">
+        현대자동차는 한국에서 만들어<br>
+        전 세계 200개 나라에 자동차를 팔아요. 🌍<br>
+        <strong>3년 연속 판매 신기록</strong>을 세웠어요!
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💡 이 회사는 뭘 해요?</span>
+      <div class="concept-box">
+        <div class="concept-icon">🚙</div>
+        <div>
+          <div class="concept-title">자동차 판매</div>
+          <div class="concept-body">아반떼, 쏘나타, 아이오닉… 매년 <strong>400만 대</strong> 넘게 팔아요!</div>
+        </div>
+      </div>
+      <div class="concept-box">
+        <div class="concept-icon">⚡</div>
+        <div>
+          <div class="concept-title">전기차 도전 중</div>
+          <div class="concept-body">기름 없이 전기로만 달리는 차를 점점 더 많이 만들고 있어요!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💰 100원 팔면 얼마 남아요?</span>
+      <div class="sec-title">100원 팔았더니<br>6.2원이 남았어요</div>
+
+      <div class="coin-bar">
+        <div class="coin-seg" style="flex:81.6; background:#3b82f6;">원가 81.6원</div>
+        <div class="coin-seg" style="flex:12.2; background:#93c5fd; color:#1e40af;">판관비</div>
+        <div class="coin-seg" style="flex:6.2; background:#16a34a; font-size:12px;">💚 6.2</div>
+      </div>
+      <div class="coin-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:#3b82f6;"></div>부품·공장 비용 81.6원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#93c5fd;"></div>광고·직원 12.2원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#16a34a;"></div>남은 돈 6.2원</div>
+      </div>
+
+      <div style="background:#eff6ff; border-radius:14px; padding:14px; margin-top:14px; font-size:13px; line-height:1.7; color:#1e40af;">
+        🍱 <strong>도시락 비유:</strong> 5,000원짜리 도시락 팔았는데<br>
+        재료비·인건비 쓰고 <strong>310원</strong>이 남는 것과 같아요.<br>
+        자동차는 만들기 어렵고 비용이 많이 들어요!
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">📊 2025년 성적표</span>
+      <div class="kpi-grid kpi-3">
+        <div class="kpi-box">
+          <div class="kpi-emoji">🚗</div>
+          <div class="kpi-label">총 판매 금액</div>
+          <div class="kpi-val">186조</div>
+          <div class="kpi-unit" style="color:#3b82f6;">원</div>
+          <div class="kpi-desc">역대 최고 신기록!</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">💵</div>
+          <div class="kpi-label">남긴 돈</div>
+          <div class="kpi-val">11조</div>
+          <div class="kpi-unit" style="color:#3b82f6;">원</div>
+          <div class="kpi-desc">작년보다 줄었어요 😥</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">📉</div>
+          <div class="kpi-label">이익률</div>
+          <div class="kpi-val">6.2</div>
+          <div class="kpi-unit" style="color:#f59e0b;">%</div>
+          <div class="kpi-desc">3년 연속 조금씩 낮아져요</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">🤔 왜 이익이 줄었을까요?</span>
+      <div class="concept-box">
+        <div class="concept-icon">🏛️</div>
+        <div>
+          <div class="concept-title">미국 관세 때문이에요</div>
+          <div class="concept-body">미국 트럼프 대통령이 한국 자동차에 세금을 더 붙였어요. 그래서 비용이 늘었어요!</div>
+        </div>
+      </div>
+      <div class="concept-box">
+        <div class="concept-icon">⚡</div>
+        <div>
+          <div class="concept-title">전기차 만드는 데 돈이 많이 들어요</div>
+          <div class="concept-body">미래를 위해 전기차 연구에 열심히 투자 중이에요. 지금은 비용이 많이 들지만, 나중에 돌아와요!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 퀴즈 -->
+    <div class="sec">
+      <span class="sec-badge">🎯 퀴즈 타임!</span>
+      <div class="quiz-box">
+        <div class="quiz-q">현대자동차가 2025년에 판 자동차 금액은?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hd1')" data-id="hd1">① 10조원</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hd1')" data-id="hd1">② 50조원</div>
+          <div class="quiz-opt" onclick="quiz(this,'correct','hd1')" data-id="hd1">③ 186조원 🚗</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hd1')" data-id="hd1">④ 500조원</div>
+        </div>
+        <div class="quiz-result" id="res-hd1-correct" style="background:#dcfce7; color:#15803d;">
+          🎉 정답! 186조원이에요! 우리나라 1년 예산과 비슷한 엄청난 금액이에요!
+        </div>
+        <div class="quiz-result" id="res-hd1-wrong" style="background:#fee2e2; color:#b91c1c;">
+          😅 아쉬워요! 정답은 ③ 186조원이에요. 엄청나죠?
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none; padding-bottom:0;">
+      <div class="msg-box">
+        <span class="msg-emoji">🌍</span>
+        <div class="msg-title">세계 어디서나 달리는<br>우리나라 자동차!</div>
+        <div class="msg-body">뉴욕, 런던, 두바이 길거리에도 현대자동차가 달려요. 전기차로 변신 중인 현대차, 미래가 기대돼요!</div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none;">
+      <span class="sec-badge">📖 오늘 배운 단어</span>
+      <div class="term-list">
+        <div class="term-item">
+          <div class="term-emoji">💸</div>
+          <div><div class="term-word">매출액</div><div class="term-def">회사가 물건을 팔아서 번 총 금액. 비용은 빼지 않은 금액이에요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">🏛️</div>
+          <div><div class="term-word">관세</div><div class="term-def">다른 나라에서 물건을 가져올 때 나라에 내는 세금이에요.</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">⚡</div>
+          <div><div class="term-word">전기차</div><div class="term-def">기름 대신 전기 배터리로 달리는 자동차. 매연이 없어요!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════ -->
+<!--  ③ 매일유업                 -->
+<!-- ════════════════════════════ -->
+<div class="card-wrap" id="ml">
+  <div class="card-meta">③ 매일유업</div>
+  <div class="card ml">
+
+    <div class="hero">
+      <span class="company-badge">🟩 매일유업</span>
+      <span class="hero-emoji">🥛🐄</span>
+      <div class="hero-title" style="color:#16a34a;">여러분이 마시는 우유를<br>만드는 회사예요!</div>
+      <div class="hero-sub" style="color:#166534;">
+        매일유업은 우유, 치즈, 분유를 만들어요.<br>
+        학교 급식 우유도 매일유업이 많이 만들어요! 🍼<br>
+        <strong>조용하지만 꾸준한 알짜 기업</strong>이에요.
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💡 이 회사는 뭘 해요?</span>
+      <div class="concept-box">
+        <div class="concept-icon">🥛</div>
+        <div>
+          <div class="concept-title">유제품 판매</div>
+          <div class="concept-body">우유, 치즈, 요거트, 분유… 매일 마시는 것들이에요! 연간 <strong>1.84조원</strong>어치 팔아요.</div>
+        </div>
+      </div>
+      <div class="concept-box">
+        <div class="concept-icon">👶</div>
+        <div>
+          <div class="concept-title">아기 분유</div>
+          <div class="concept-body">한국 아기들이 먹는 분유 시장 1위예요. 해외로도 많이 수출해요!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💰 100원 팔면 얼마 남아요?</span>
+      <div class="sec-title">100원 팔았더니<br>3.3원이 남았어요</div>
+
+      <div class="coin-bar">
+        <div class="coin-seg" style="flex:65; background:#22c55e;">원재료 65원</div>
+        <div class="coin-seg" style="flex:31.7; background:#86efac; color:#166534;">판관비 31.7</div>
+        <div class="coin-seg" style="flex:3.3; background:#f97316; font-size:10px;">3.3</div>
+      </div>
+      <div class="coin-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:#22c55e;"></div>원유·재료 비용 65원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#86efac;"></div>광고·물류 31.7원</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#f97316;"></div>남은 돈 3.3원</div>
+      </div>
+
+      <div style="background:#f0fdf4; border-radius:14px; padding:14px; margin-top:14px; font-size:13px; line-height:1.7; color:#166534;">
+        🧃 <strong>음료수 비유:</strong> 1,000원짜리 우유 팔면<br>
+        원유 값, 포장비, 배달비 내고 <strong>33원</strong>이 남아요.<br>
+        적어 보이지만 <strong>꾸준히 쌓이면</strong> 엄청난 금액!
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">📊 2025년 성적표</span>
+      <div class="kpi-grid kpi-3">
+        <div class="kpi-box">
+          <div class="kpi-emoji">🥛</div>
+          <div class="kpi-label">총 판매 금액</div>
+          <div class="kpi-val">1.84조</div>
+          <div class="kpi-unit" style="color:#22c55e;">원</div>
+          <div class="kpi-desc">3년 연속 늘었어요! ↑</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">🏦</div>
+          <div class="kpi-label">저축한 현금</div>
+          <div class="kpi-val">2,612</div>
+          <div class="kpi-unit" style="color:#22c55e;">억</div>
+          <div class="kpi-desc">2년 만에 2배로 늘었어요!</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">📉</div>
+          <div class="kpi-label">빚 비율</div>
+          <div class="kpi-val">68.9</div>
+          <div class="kpi-unit" style="color:#22c55e;">%</div>
+          <div class="kpi-desc">3년 연속 줄고 있어요 ↓</div>
+        </div>
+      </div>
+
+      <div style="background:#dcfce7; border-radius:14px; padding:14px; margin-top:14px; font-size:13px; line-height:1.7; color:#166534;">
+        🐢 <strong>거북이처럼 꾸준해요!</strong><br>
+        이익률은 낮지만 빚은 줄이고, 현금은 쌓고 있어요.<br>
+        경제가 어려울 때도 <strong>꿋꿋한 회사</strong>예요!
+      </div>
+    </div>
+
+    <!-- 퀴즈 -->
+    <div class="sec">
+      <span class="sec-badge">🎯 퀴즈 타임!</span>
+      <div class="quiz-box">
+        <div class="quiz-q">매일유업이 3년 동안 계속 늘린 것은 무엇일까요?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="quiz(this,'wrong','ml1')" data-id="ml1">① 직원 수</div>
+          <div class="quiz-opt" onclick="quiz(this,'correct','ml1')" data-id="ml1">② 매출액과 현금 💰</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','ml1')" data-id="ml1">③ 빚</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','ml1')" data-id="ml1">④ 광고비</div>
+        </div>
+        <div class="quiz-result" id="res-ml1-correct" style="background:#dcfce7; color:#15803d;">
+          🎉 정답! 매출도 3년 연속 늘고, 현금도 2배로 늘었어요! 대단하죠?
+        </div>
+        <div class="quiz-result" id="res-ml1-wrong" style="background:#fee2e2; color:#b91c1c;">
+          😅 아쉬워요! 정답은 ② 매출액과 현금이에요. 꾸준한 성장이 중요해요!
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none; padding-bottom:0;">
+      <div class="msg-box">
+        <span class="msg-emoji">🥛</span>
+        <div class="msg-title">매일 마시는 우유 한 모금이<br>이 회사를 키워요!</div>
+        <div class="msg-body">여러분이 우유를 마실 때마다 이 회사가 성장해요. 작지만 꾸준한 것이 얼마나 강한지 보여주는 회사예요!</div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none;">
+      <span class="sec-badge">📖 오늘 배운 단어</span>
+      <div class="term-list">
+        <div class="term-item">
+          <div class="term-emoji">🏦</div>
+          <div><div class="term-word">현금성 자산</div><div class="term-def">회사가 언제든지 쓸 수 있는 저금 같은 돈이에요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">📊</div>
+          <div><div class="term-word">부채비율</div><div class="term-def">회사가 빌린 돈의 비율. 낮을수록 건강한 회사예요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">🛡️</div>
+          <div><div class="term-word">방어주</div><div class="term-def">경기가 나빠져도 꾸준한 회사 주식. 우유처럼 항상 팔리니까요!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════ -->
+<!--  ④ 한샘                    -->
+<!-- ════════════════════════════ -->
+<div class="card-wrap" id="hs">
+  <div class="card-meta">④ 한샘</div>
+  <div class="card hs">
+
+    <div class="hero">
+      <span class="company-badge">🟪 한샘</span>
+      <span class="hero-emoji">🛋️🏠</span>
+      <div class="hero-title" style="color:#7c3aed;">집 꾸미는 가구와<br>인테리어 회사예요!</div>
+      <div class="hero-sub" style="color:#5b21b6;">
+        한샘은 부엌, 옷장, 침대, 소파를 만들어요.<br>
+        새 아파트에 이사 갈 때 많이 사는 브랜드예요! 🏡<br>
+        <strong>3년 만에 적자에서 흑자로 돌아왔어요.</strong>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💡 이 회사는 뭘 해요?</span>
+      <div class="concept-box">
+        <div class="concept-icon">🛋️</div>
+        <div>
+          <div class="concept-title">가구 판매</div>
+          <div class="concept-body">부엌 싱크대, 붙박이장, 거실 가구 등 집 전체를 꾸며줘요!</div>
+        </div>
+      </div>
+      <div class="concept-box">
+        <div class="concept-icon">🏗️</div>
+        <div>
+          <div class="concept-title">인테리어 시공</div>
+          <div class="concept-body">집을 새로 리모델링해주는 서비스도 해요. 아파트 거래가 늘면 이 회사도 바빠져요!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">💫 3년 만의 기적!</span>
+      <div class="sec-title">적자 → 흑자 성공했어요!</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+        <div style="background:#fee2e2; border-radius:12px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:12px; color:#dc2626; font-weight:700;">2023년 😢</div>
+            <div style="font-size:11px; color:#dc2626; margin-top:2px;">부동산 시장 침체</div>
+          </div>
+          <div style="font-size:22px; font-weight:900; color:#dc2626;">-622억</div>
+        </div>
+        <div style="text-align:center; font-size:20px; color:#a855f7;">↓</div>
+        <div style="background:#f0fdf4; border-radius:12px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:12px; color:#16a34a; font-weight:700;">2025년 😊</div>
+            <div style="font-size:11px; color:#16a34a; margin-top:2px;">구조조정 성공</div>
+          </div>
+          <div style="font-size:22px; font-weight:900; color:#16a34a;">+463억</div>
+        </div>
+      </div>
+
+      <div style="background:#faf5ff; border-radius:14px; padding:14px; margin-top:14px; font-size:13px; line-height:1.7; color:#5b21b6;">
+        🏥 <strong>다이어트 성공 비유:</strong><br>
+        살을 빼려고 군것질을 줄이고 운동한 것처럼,<br>
+        한샘도 <strong>불필요한 비용을 줄여서</strong> 건강해졌어요!
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">📊 2025년 성적표</span>
+      <div class="kpi-grid kpi-3">
+        <div class="kpi-box">
+          <div class="kpi-emoji">🛋️</div>
+          <div class="kpi-label">총 판매 금액</div>
+          <div class="kpi-val">1.74조</div>
+          <div class="kpi-unit" style="color:#a855f7;">원</div>
+          <div class="kpi-desc">조금 줄었어요 😥</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">🎉</div>
+          <div class="kpi-label">순이익</div>
+          <div class="kpi-val">463억</div>
+          <div class="kpi-unit" style="color:#a855f7;">원</div>
+          <div class="kpi-desc">흑자 전환 성공! ✅</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-emoji">📉</div>
+          <div class="kpi-label">빚 비율</div>
+          <div class="kpi-val">148</div>
+          <div class="kpi-unit" style="color:#a855f7;">%</div>
+          <div class="kpi-desc">2년 만에 크게 줄었어요!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="sec-badge">🏠 부동산이랑 무슨 관계예요?</span>
+      <div class="analogy-wrap">
+        <div class="analogy-box">
+          <div class="analogy-title">🏚️ 아파트 거래 적으면</div>
+          <div class="analogy-body" style="color:#7c3aed;">이사 안 감<br>→ 가구 안 삼<br>→ 한샘 매출 ↓</div>
+        </div>
+        <div class="analogy-arrow">→</div>
+        <div class="analogy-box">
+          <div class="analogy-title">🏠 아파트 거래 많으면</div>
+          <div class="analogy-body" style="color:#16a34a;">이사 많이 감<br>→ 가구 많이 삼<br>→ 한샘 매출 ↑</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 퀴즈 -->
+    <div class="sec">
+      <span class="sec-badge">🎯 퀴즈 타임!</span>
+      <div class="quiz-box">
+        <div class="quiz-q">한샘이 돈을 더 잘 벌려면<br>무엇이 늘어야 할까요?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hs1')" data-id="hs1">① 비가 많이 오면</div>
+          <div class="quiz-opt" onclick="quiz(this,'correct','hs1')" data-id="hs1">② 아파트 이사가 많아지면 🏠</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hs1')" data-id="hs1">③ 날씨가 추워지면</div>
+          <div class="quiz-opt" onclick="quiz(this,'wrong','hs1')" data-id="hs1">④ 학교가 방학이면</div>
+        </div>
+        <div class="quiz-result" id="res-hs1-correct" style="background:#dcfce7; color:#15803d;">
+          🎉 정답! 이사를 많이 가면 새 가구가 필요해서 한샘에서 많이 사요!
+        </div>
+        <div class="quiz-result" id="res-hs1-wrong" style="background:#fee2e2; color:#b91c1c;">
+          😅 아쉬워요! 정답은 ② 아파트 이사가 많아질 때예요!
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none; padding-bottom:0;">
+      <div class="msg-box">
+        <span class="msg-emoji">💪</span>
+        <div class="msg-title">넘어져도 다시 일어서는<br>한샘의 이야기예요!</div>
+        <div class="msg-body">3년 만에 적자에서 흑자로 돌아온 건 대단한 일이에요. 포기하지 않고 비용을 줄이고 효율을 높였기 때문이에요!</div>
+      </div>
+    </div>
+
+    <div class="sec" style="border:none;">
+      <span class="sec-badge">📖 오늘 배운 단어</span>
+      <div class="term-list">
+        <div class="term-item">
+          <div class="term-emoji">📉</div>
+          <div><div class="term-word">적자</div><div class="term-def">쓴 돈이 번 돈보다 많은 상태. 마이너스가 된 거예요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">📈</div>
+          <div><div class="term-word">흑자</div><div class="term-def">번 돈이 쓴 돈보다 많은 상태. 남는 게 생긴 거예요!</div></div>
+        </div>
+        <div class="term-item">
+          <div class="term-emoji">✂️</div>
+          <div><div class="term-word">구조조정</div><div class="term-def">회사가 돈을 아끼기 위해 불필요한 것을 줄이는 것이에요.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(id, btn) {
+  document.getElementById(id).scrollIntoView({ behavior:'smooth', block:'start' });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function quiz(el, type, id) {
+  // 이미 답한 경우 무시
+  if (el.closest('.quiz-opts').dataset.answered) return;
+  el.closest('.quiz-opts').dataset.answered = '1';
+
+  const opts = el.closest('.quiz-opts').querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(type);
+
+  const correct = document.getElementById(`res-${id}-correct`);
+  const wrong = document.getElementById(`res-${id}-wrong`);
+  if (type === 'correct') { correct.style.display = 'block'; }
+  else { wrong.style.display = 'block'; }
+}
+</script>
+</body>
+</html>
