@@ -26,7 +26,8 @@
       "Bash(python3 공구가격표.py)",
       "Bash(ls ~/Library/Fonts/ | grep -i \".ttf\" *)",
       "Bash(open ~/Desktop/yegam/오가닉소창_공구가격표.pdf)",
-      "Bash(xargs -I {} du -sh \"{}\")"
+      "Bash(xargs -I {} du -sh \"{}\")",
+      "Bash(cp /root/.claude/uploads/5b6e1b7e-b131-5d3c-a561-8214ca3af20d/6d25a7d4-oceanview_invoice.html /home/user/yegam/oceanview_invoice.html)"
     ]
   }
 }
