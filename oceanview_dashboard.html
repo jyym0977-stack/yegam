@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OceanView · Invoice Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f2f1ed;min-height:100vh}
+header{background:#fff;border-bottom:1px solid #ddd;padding:0 2rem;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.logo{font-size:14px;font-weight:700;color:#111}
+.logo-sub{font-size:12px;color:#aaa}
+
+/* Upload */
+.upload-page{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 52px);padding:2rem}
+.upload-card{background:#fff;border-radius:16px;border:1px solid #e0ddd5;padding:2.5rem;width:100%;max-width:440px;text-align:center}
+.card-title{font-size:20px;font-weight:700;color:#111;margin-bottom:6px}
+.card-sub{font-size:13px;color:#888;margin-bottom:2rem;line-height:1.5}
+.upload-zone{border:2px dashed #d0cdc5;border-radius:12px;padding:2.5rem;cursor:pointer;transition:all 0.15s;background:#faf9f7}
+.upload-zone:hover,.upload-zone.drag{border-color:#888;background:#f0ede8}
+.upload-icon{font-size:38px;margin-bottom:10px}
+.upload-main{font-size:14px;font-weight:600;color:#333;margin-bottom:4px}
+.upload-hint{font-size:12px;color:#999}
+
+/* Dashboard */
+.dashboard{display:none;padding:1.5rem 2rem 100px;max-width:1050px;margin:0 auto}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:10px}
+.dash-meta{font-size:13px;color:#666;line-height:1.7}
+.dash-meta strong{font-size:15px;color:#111;display:block}
+
+/* Table card */
+.table-card{background:#fff;border-radius:12px;border:1px solid #e0ddd5;overflow:hidden}
+.toolbar{padding:12px 16px;border-bottom:1px solid #f0ede8;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.search-box{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:220px;outline:none}
+.search-box:focus{border-color:#2d6a4f;box-shadow:0 0 0 2px rgba(45,106,79,0.1)}
+.sel-info{font-size:13px;color:#666}
+.sel-info b{color:#1a5a35}
+
+table{width:100%;border-collapse:collapse}
+th{background:#f5f4f0;font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.04em;padding:10px 12px;text-align:left;border-bottom:1px solid #e0ddd5}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f8f7f4;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.row-hover:hover td{background:#faf9f7;cursor:pointer}
+tr.row-selected td{background:#f0faf4}
+.room-badge{font-weight:700;color:#111;font-size:13px}
+.night-chip{background:#e8f5ee;color:#1a5a35;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block}
+.tag{font-size:10px;padding:2px 7px;border-radius:4px;margin-right:3px;display:inline-block}
+.tag-room{background:#e8f5ee;color:#1a5a35}
+.tag-meal{background:#fef3e8;color:#a0522d}
+.tag-laundry{background:#e8f0fe;color:#3949ab}
+.tag-other{background:#f5f4f0;color:#666}
+.amt{font-weight:700;color:#111;text-align:right}
+input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;flex-shrink:0}
+
+/* Bottom bar */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:14px 2rem;display:none;align-items:center;justify-content:space-between;gap:12px;z-index:10}
+.total-display{font-size:13px;color:#666}
+.total-display strong{font-size:16px;color:#111}
+.btn{padding:11px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:#1a3a2a;color:#fff}
+.btn-primary:hover{background:#0f2a1d}
+.btn-primary:disabled{background:#bbb;cursor:not-allowed}
+.btn-sm{background:#f5f4f0;color:#444;border:1px solid #ddd;font-size:12px;padding:7px 13px}
+.btn-sm:hover{background:#ece9e3}
+
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a3a2a;color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">Hotel OceanView</span>
+  <span class="logo-sub">Invoice Dashboard</span>
+</header>
+
+<!-- Upload screen -->
+<div class="upload-page" id="uploadPage">
+  <div class="upload-card">
+    <div class="card-title">Invoice Dashboard</div>
+    <div class="card-sub">호텔 빌 엑셀 파일을 업로드하면<br>룸별로 인보이스를 선택 생성합니다<br><br>✅ 완전 무료 &nbsp;·&nbsp; AI 불필요 &nbsp;·&nbsp; 오프라인 동작</div>
+    <div class="upload-zone" id="zone" onclick="document.getElementById('xlsxInput').click()">
+      <div class="upload-icon">📊</div>
+      <div class="upload-main">BILL.xlsx 클릭하거나 드래그</div>
+      <div class="upload-hint">탭이 여러 개인 엑셀 파일</div>
+    </div>
+    <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none">
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <div class="dash-meta">
+      <strong id="metaTitle">회사명</strong>
+      <span id="metaSub"></span>
+    </div>
+    <button class="btn btn-sm" onclick="reloadFile()">📂 다른 파일 열기</button>
+  </div>
+
+  <div class="table-card">
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="chkAll" onchange="toggleAll(this.checked)" title="전체 선택/해제">
+        <input type="text" class="search-box" id="searchBox" placeholder="이름 또는 호실 검색..." oninput="filterRooms()">
+      </div>
+      <div class="sel-info" id="selInfo">0개 선택</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px"></th>
+          <th style="width:66px">호실</th>
+          <th>게스트명</th>
+          <th style="width:72px">박수</th>
+          <th style="width:96px">체크인</th>
+          <th style="width:96px">체크아웃</th>
+          <th>청구항목</th>
+          <th style="width:116px;text-align:right">합계</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar" id="bottomBar">
+  <div class="total-display" id="totalDisplay">선택: 0명 | 합계: KRW 0</div>
+  <button class="btn btn-primary" id="genBtn" onclick="generatePDF()" disabled>
+    📥 선택한 방 인보이스 PDF 생성
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allRooms = [], filtered = [];
+let meta = {company:'', vessel:'', filename:''};
+
+// ── 파일 업로드 ─────────────────────────────────────────
+const zone = document.getElementById('zone');
+zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('drag')});
+zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'));
+zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])});
+document.getElementById('xlsxInput').addEventListener('change', e=>{if(e.target.files[0])readFile(e.target.files[0])});
+
+function reloadFile(){
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('bottomBar').style.display='none';
+  document.getElementById('uploadPage').style.display='flex';
+}
+
+function readFile(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      parseWB(wb, file.name);
+    } catch(err) { alert('파일 오류: '+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── 엑셀 파싱 ────────────────────────────────────────────
+function serialToDate(s){
+  if(!s||isNaN(s)) return null;
+  return new Date((Number(s)-25569)*86400*1000);
+}
+function fmtDate(d){ return d?d.toISOString().split('T')[0]:''; }
+function addDay(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+function parseSheet(ws, sheetName){
+  const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  if(rows.length<8) return null;
+
+  const vessel    = String(rows[4]?.[0]||'').trim();
+  const company   = String(rows[5]?.[1]||'').trim();
+  const roomNo    = String(rows[5]?.[4]||'').trim();
+  const guestName = String(rows[5]?.[7]||'').trim();
+
+  let dates=[], nights=0, ratePerNight=0;
+  let tRoom=0,tLunch=0,tDinner=0,tCafe=0,tLaundry=0,tOther=0;
+
+  for(let r=7;r<=21;r++){
+    const row=rows[r];
+    if(!row||!row[0]||row[0]==='') continue;
+    const d=serialToDate(Number(row[0]));
+    if(!d) continue;
+    dates.push(d);
+    const room=Number(row[1])||0, lunch=Number(row[2])||0, dinner=Number(row[3])||0;
+    const cafe=Number(row[4])||0, laundry=Number(row[5])||0, other=Number(row[6])||0;
+    if(room>0){nights++;ratePerNight=room;}
+    tRoom+=room; tLunch+=lunch; tDinner+=dinner;
+    tCafe+=cafe; tLaundry+=laundry; tOther+=other;
+  }
+
+  const grandTotal = Number(rows[22]?.[7])||0;
+  if(grandTotal===0 && dates.length===0) return null;
+
+  const checkIn  = dates.length>0 ? fmtDate(dates[0]) : '';
+  const checkOut = dates.length>0 ? fmtDate(addDay(dates[dates.length-1],1)) : '';
+
+  const charges=[];
+  if(tRoom>0)    charges.push({desc:`Room ${nights} nights`, amt:tRoom,    rate:ratePerNight});
+  if(tLunch>0)   charges.push({desc:'Lunch',   amt:tLunch});
+  if(tDinner>0)  charges.push({desc:'Dinner',  amt:tDinner});
+  if(tCafe>0)    charges.push({desc:'Café',    amt:tCafe});
+  if(tLaundry>0) charges.push({desc:'Laundry', amt:tLaundry});
+  if(tOther>0)   charges.push({desc:'Other',   amt:tOther});
+
+  if(charges.length===0) return null;
+
+  const total = grandTotal || charges.reduce((s,c)=>s+c.amt,0);
+  return {sheetName,roomNo,guestName,company,vessel,checkIn,checkOut,charges,total,nights,checked:false};
+}
+
+function parseWB(wb, filename){
+  allRooms=[];
+  let company='', vessel='';
+  wb.SheetNames.forEach(name=>{
+    const r=parseSheet(wb.Sheets[name], name);
+    if(r){
+      allRooms.push(r);
+      if(!company&&r.company) company=r.company;
+      if(!vessel&&r.vessel)   vessel=r.vessel;
+    }
+  });
+  meta={company,vessel,filename};
+  filtered=[...allRooms];
+
+  document.getElementById('uploadPage').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('bottomBar').style.display='flex';
+  document.getElementById('metaTitle').textContent = company||'(회사명 없음)';
+  document.getElementById('metaSub').textContent   = `${vessel||''}  ·  ${filename}  ·  총 ${allRooms.length}개 방`;
+  renderTable();
+}
+
+// ── 테이블 렌더링 ────────────────────────────────────────
+function tagHtml(charges){
+  return charges.map(c=>{
+    const cls = c.desc.startsWith('Room')?'tag-room':c.desc==='Laundry'?'tag-laundry':c.desc==='Other'?'tag-other':'tag-meal';
+    return `<span class="tag ${cls}">${c.desc}</span>`;
+  }).join('');
+}
+
+function renderTable(){
+  const f=n=>Number(n).toLocaleString('ko-KR');
+  document.getElementById('tbody').innerHTML = filtered.map((r,i)=>`
+    <tr class="row-hover${r.checked?' row-selected':''}" onclick="toggleRow(${i})">
+      <td><input type="checkbox" ${r.checked?'checked':''} onclick="event.stopPropagation();toggleRow(${i})"></td>
+      <td class="room-badge">${r.roomNo}</td>
+      <td>${r.guestName}</td>
+      <td><span class="night-chip">${r.nights}박</span></td>
+      <td>${r.checkIn}</td>
+      <td>${r.checkOut}</td>
+      <td>${tagHtml(r.charges)}</td>
+      <td class="amt">KRW ${f(r.total)}</td>
+    </tr>`).join('');
+  updateSummary();
+}
+
+function toggleRow(i){
+  filtered[i].checked=!filtered[i].checked;
+  const orig=allRooms.find(r=>r.sheetName===filtered[i].sheetName);
+  if(orig) orig.checked=filtered[i].checked;
+  renderTable();
+}
+
+function toggleAll(v){
+  filtered.forEach(r=>{
+    r.checked=v;
+    const o=allRooms.find(a=>a.sheetName===r.sheetName);
+    if(o) o.checked=v;
+  });
+  renderTable();
+}
+
+function filterRooms(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  filtered=allRooms.filter(r=>r.roomNo.toLowerCase().includes(q)||r.guestName.toLowerCase().includes(q));
+  renderTable();
+}
+
+function updateSummary(){
+  const sel=allRooms.filter(r=>r.checked);
+  const tot=sel.reduce((s,r)=>s+r.total,0);
+  const f=n=>Number(n).toLocaleString('ko-KR');
+  document.getElementById('selInfo').innerHTML=`<b>${sel.length}개</b> 선택`;
+  document.getElementById('totalDisplay').innerHTML=`선택: <b>${sel.length}명</b> &nbsp;|&nbsp; 합계: <strong>KRW ${f(tot)}</strong>`;
+  document.getElementById('genBtn').disabled=sel.length===0;
+  const allChk=filtered.length>0&&filtered.every(r=>r.checked);
+  const someChk=filtered.some(r=>r.checked);
+  document.getElementById('chkAll').checked=allChk;
+  document.getElementById('chkAll').indeterminate=!allChk&&someChk;
+}
+
+// ── Invoice 번호 ─────────────────────────────────────────
+function nextInvNo(){
+  const t=new Date();
+  const p='INV-'+t.getFullYear()+String(t.getMonth()+1).padStart(2,'0')+'-';
+  const k='inv_'+p, n=parseInt(localStorage.getItem(k)||'0')+1;
+  localStorage.setItem(k,n);
+  return p+String(n).padStart(3,'0');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── PDF 생성 ─────────────────────────────────────────────
+function generatePDF(){
+  const sel=allRooms.filter(r=>r.checked);
+  if(!sel.length) return;
+  const invNo=nextInvNo(), invDate=new Date().toISOString().split('T')[0];
+  const bytes=buildPDF(sel,invNo,invDate);
+  const name=`Invoice_${(meta.vessel||'OceanView').replace(/\s+/g,'_')}_${invDate}.pdf`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+  a.download=name; a.click();
+  showToast(`✅ ${sel.length}명 인보이스 PDF 생성 완료`);
+}
+
+// ══════════════════════════════════════════════════════════
+// PDF BUILDER
+// ══════════════════════════════════════════════════════════
+const PW=210,ML=20,MR=20,CW=170,RH=8;
+const c1=ML,c2=ML+28,c3=ML+48,c4=ML+88,c5=ML+140,c6=ML+162,cEnd=PW-MR;
+const ff=n=>Number(n).toLocaleString('ko-KR');
+
+function pdfHeader(doc,invNo,invDate){
+  doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+  doc.text('HOTEL ADRESS',ML,13);
+  doc.setFontSize(7);
+  doc.text('50, Haesuyokjang 1-gil, Dong-gu, Ulsan 44057 Korea',ML,17.5);
+
+  doc.setFontSize(17);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+  doc.text('Hotel',105,12,{align:'center'});
+  doc.text('OceanView',105,20,{align:'center'});
+  doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+  doc.text('ULSAN, KOREA',105,25,{align:'center'});
+
+  doc.setFontSize(7.5);doc.setTextColor(80,80,80);
+  doc.text('HOTEL CONTACT',PW-MR,13,{align:'right'});
+  doc.setFontSize(7);
+  doc.text('+82 .52. 235 . 7777',PW-MR,17.5,{align:'right'});
+  doc.text('hotelov@hanmail.net',PW-MR,22,{align:'right'});
+
+  doc.setDrawColor(160,160,160);doc.setLineWidth(0.5);
+  doc.line(ML,29,PW-MR,29);
+
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+  doc.text(`Invoice No: ${invNo}`,PW-MR,36,{align:'right'});
+  doc.text(`Date: ${invDate}`,PW-MR,41,{align:'right'});
+}
+
+function pdfCompanyVessel(doc,company,vessel){
+  const y=38;
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+  doc.text('Company',100,y,{align:'right'});
+  doc.text(company||'',110,y);
+  doc.text('Vessel Name',100,y+9,{align:'right'});
+  doc.text(vessel||'',110,y+9);
+  return y+20;
+}
+
+function pdfTableHeader(doc,y){
+  doc.setFillColor(225,225,225);
+  doc.rect(ML,y,CW,RH,'F');
+  doc.setDrawColor(160,160,160);doc.setLineWidth(0.4);
+  doc.rect(ML,y,CW,RH,'S');
+  vdivs(doc,y,y+RH);
+  doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+  doc.text('DATE',(c1+c2)/2,y+5,{align:'center'});
+  doc.text('Room',(c2+c3)/2,y+3.5,{align:'center'});
+  doc.text('No.',(c2+c3)/2,y+7,{align:'center'});
+  doc.text('Name',(c3+c4)/2,y+5,{align:'center'});
+  doc.text('DESCRIPTION',(c4+c5)/2,y+5,{align:'center'});
+  doc.text('AMOUNT',(c5+c6)/2,y+5,{align:'center'});
+  doc.text('TOTAL',(c6+cEnd)/2,y+5,{align:'center'});
+  return y+RH;
+}
+
+function vdivs(doc,top,bot){
+  doc.setDrawColor(180,180,180);doc.setLineWidth(0.3);
+  [c2,c3,c4,c5,c6].forEach(x=>doc.line(x,top,x,bot));
+}
+
+function pdfGuestRows(doc,guest,y){
+  const ch=guest.charges||[];
+  const n=ch.length;
+  ch.forEach((c,i)=>{
+    const dateStr=n===1?guest.checkIn:i===0?guest.checkIn:i===n-1?guest.checkOut:'~';
+    doc.setDrawColor(190,190,190);doc.setLineWidth(0.3);
+    doc.rect(ML,y,CW,RH,'S');
+    vdivs(doc,y,y+RH);
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(20,20,20);
+    if(dateStr)       doc.text(dateStr,(c1+c2)/2,y+5,{align:'center'});
+    if(i===0)         doc.text(String(guest.roomNo||''),(c2+c3)/2,y+5,{align:'center'});
+    if(i===0)         doc.text(String(guest.guestName||''),(c3+c4)/2,y+5,{align:'center'});
+    doc.text(c.desc||'',c4+3,y+5);
+    // AMOUNT col: per-night rate for room only
+    if(c.rate&&c.rate>0) doc.text(ff(c.rate),c6-2,y+5,{align:'right'});
+    // TOTAL col: item total
+    if(c.amt>0) doc.text(ff(c.amt),cEnd-2,y+5,{align:'right'});
+    y+=RH;
+  });
+  return y;
+}
+
+function buildPDF(guests,invNo,invDate){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const PAGE_H=297, BOTTOM=25;
+  const company=guests[0]?.company||'';
+  const vessel=guests[0]?.vessel||'';
+
+  function newPage(){
+    doc.addPage();
+    pdfHeader(doc,invNo,invDate);
+    let y=pdfCompanyVessel(doc,company,vessel);
+    return pdfTableHeader(doc,y);
+  }
+
+  pdfHeader(doc,invNo,invDate);
+  let y=pdfCompanyVessel(doc,company,vessel);
+  y=pdfTableHeader(doc,y);
+  let grandTotal=0;
+
+  guests.forEach(guest=>{
+    const need=(guest.charges?.length||1)*RH;
+    if(y+need+RH>PAGE_H-BOTTOM) y=newPage();
+    y=pdfGuestRows(doc,guest,y);
+    grandTotal+=guest.total||0;
+  });
+
+  if(y+RH+12>PAGE_H-BOTTOM) y=newPage();
+  doc.setFillColor(220,220,220);
+  doc.rect(ML,y,CW,RH,'F');
+  doc.setDrawColor(120,120,120);doc.setLineWidth(0.5);
+  doc.rect(ML,y,CW,RH,'S');
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+  doc.text('Total.',105,y+5.5,{align:'center'});
+  doc.text(ff(grandTotal),cEnd-2,y+5.5,{align:'right'});
+  y+=RH+10;
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+  doc.text('Thank you.',105,y,{align:'center'});
+
+  return doc.output('arraybuffer');
+}
+</script>
+</body>
+</html>
