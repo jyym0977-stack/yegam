@@ -199,6 +199,28 @@ async function clearHandle(){
 // ── 서버 모드 감지 및 자동 로드 ────────────────────────
 const SERVER_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
+// ── WebSocket: BILL.xlsx 변경 시 자동 새로고침 ─────────
+if(SERVER_MODE){
+  function connectWS(){
+    const ws = new WebSocket(`ws://localhost:3000`);
+    ws.onmessage = async (e) => {
+      const msg = JSON.parse(e.data);
+      if(msg.type === 'reload'){
+        showToast('📂 BILL.xlsx 변경 감지 — 자동 업데이트 중...');
+        await new Promise(r=>setTimeout(r,500));
+        try{
+          const buf = await fetch('/api/bill?t='+Date.now()).then(r=>r.arrayBuffer());
+          const wb = XLSX.read(buf,{type:'array'});
+          parseWB(wb,'BILL.xlsx');
+          showToast('✅ 최신 데이터로 자동 업데이트됨');
+        } catch(e){ showToast('❌ 업데이트 실패: '+e.message); }
+      }
+    };
+    ws.onclose = () => setTimeout(connectWS, 3000);
+  }
+  connectWS();
+}
+
 async function tryAutoLoad(){
   // ▶ 서버 모드: /api/bill 에서 자동 로드
   if(SERVER_MODE){
