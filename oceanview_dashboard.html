@@ -104,7 +104,10 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;
       <strong id="metaTitle">회사명</strong>
       <span id="metaSub"></span>
     </div>
-    <button class="btn btn-sm" onclick="reloadFile()">📂 다른 파일 열기</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm" id="logoBtn" onclick="handleLogoBtnClick()">🖼 로고 이미지 등록</button>
+      <button class="btn btn-sm" onclick="reloadFile()">📂 다른 파일 열기</button>
+    </div>
   </div>
 
   <div class="table-card">
@@ -355,6 +358,7 @@ function parseWB(wb, filename){
   document.getElementById('bottomBar').style.display='flex';
   document.getElementById('metaTitle').textContent = company||'(회사명 없음)';
   document.getElementById('metaSub').textContent   = `${vessel||''}  ·  ${filename}  ·  총 ${allRooms.length}개 방`;
+  updateLogoBtn();
   renderTable();
 }
 
@@ -417,6 +421,47 @@ function updateSummary(){
   document.getElementById('chkAll').indeterminate=!allChk&&someChk;
 }
 
+// ── 로고 저장/로드 ───────────────────────────────────────
+let logoBase64 = localStorage.getItem('ov_logo')||null;
+
+function pickLogo(){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*';
+  inp.onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      logoBase64=ev.target.result;
+      localStorage.setItem('ov_logo',logoBase64);
+      updateLogoBtn();
+      showToast('✅ 로고 저장됨 — 이후 PDF에 자동 적용');
+    };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+function clearLogo(){
+  logoBase64=null; localStorage.removeItem('ov_logo');
+  updateLogoBtn(); showToast('로고 삭제됨');
+}
+function updateLogoBtn(){
+  const btn=document.getElementById('logoBtn');
+  if(!btn) return;
+  btn.innerHTML = logoBase64
+    ? '🖼 로고 변경 / 삭제 <span style="font-size:11px;color:#aaa;font-weight:400">(저장됨 ✓)</span>'
+    : '🖼 로고 이미지 등록';
+}
+
+function handleLogoBtnClick(){
+  if(logoBase64){
+    if(confirm('저장된 로고를 삭제하고 새 로고를 등록할까요?\n\n취소하면 그냥 새 로고를 선택합니다.'))
+      clearLogo();
+    else pickLogo();
+  } else {
+    pickLogo();
+  }
+}
+
 // ── Invoice 번호 ─────────────────────────────────────────
 function nextInvNo(){
   const t=new Date();
@@ -448,44 +493,74 @@ function generatePDF(){
 // ══════════════════════════════════════════════════════════
 // PDF BUILDER
 // ══════════════════════════════════════════════════════════
-const PW=210,ML=20,MR=20,CW=170,RH=8;
-const c1=ML,c2=ML+28,c3=ML+48,c4=ML+88,c5=ML+140,c6=ML+162,cEnd=PW-MR;
+const PW=210,ML=14,MR=14,CW=182,RH=8;
+// DATE(20) | RoomNo(13) | Name(45) | Description(38) | AMOUNT(28) | TOTAL(28) = 172... adjust
+const c1=ML;       // 14
+const c2=c1+20;    // 34  DATE width=20
+const c3=c2+13;    // 47  RoomNo width=13
+const c4=c3+45;    // 92  Name width=45
+const c5=c4+40;    // 132 Description width=40
+const c6=c5+27;    // 159 AMOUNT width=27
+const cEnd=PW-MR;  // 196 TOTAL width=37
 const ff=n=>Number(n).toLocaleString('ko-KR');
+function trunc(str,maxW,doc){
+  // jsPDF getStringUnitWidth * fontSize / doc.internal.scaleFactor
+  const fs=doc.getFontSize();
+  while(str.length>1&&doc.getStringUnitWidth(str)*fs/doc.internal.scaleFactor>maxW) str=str.slice(0,-1);
+  return str;
+}
 
 function pdfHeader(doc,invNo,invDate){
+  // Left: address
   doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
   doc.text('HOTEL ADRESS',ML,13);
   doc.setFontSize(7);
-  doc.text('50, Haesuyokjang 1-gil, Dong-gu, Ulsan 44057 Korea',ML,17.5);
+  doc.text('50, Haesuyokjang 1-gil,',ML,17.5);
+  doc.text('Dong-gu, Ulsan 44057 Korea',ML,21.5);
 
-  doc.setFontSize(17);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
-  doc.text('Hotel',105,12,{align:'center'});
-  doc.text('OceanView',105,20,{align:'center'});
+  // Center: logo image or text fallback
+  if(logoBase64){
+    const imgW=28, imgH=28;
+    const ix=PW/2-imgW/2, iy=5;
+    try{ doc.addImage(logoBase64,'PNG',ix,iy,imgW,imgH); }
+    catch(e){
+      try{ doc.addImage(logoBase64,'JPEG',ix,iy,imgW,imgH); }catch(e2){ drawTextLogo(doc); }
+    }
+  } else {
+    drawTextLogo(doc);
+  }
+
+  // Right: contact
   doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
-  doc.text('ULSAN, KOREA',105,25,{align:'center'});
-
-  doc.setFontSize(7.5);doc.setTextColor(80,80,80);
-  doc.text('HOTEL CONTACT',PW-MR,13,{align:'right'});
+  doc.text('HOTEL CONTACT',cEnd,13,{align:'right'});
   doc.setFontSize(7);
-  doc.text('+82 .52. 235 . 7777',PW-MR,17.5,{align:'right'});
-  doc.text('hotelov@hanmail.net',PW-MR,22,{align:'right'});
+  doc.text('+82 .52. 235 . 7777',cEnd,17.5,{align:'right'});
+  doc.text('hotelov@hanmail.net',cEnd,22,{align:'right'});
 
   doc.setDrawColor(160,160,160);doc.setLineWidth(0.5);
-  doc.line(ML,29,PW-MR,29);
+  doc.line(ML,35,cEnd,35);
 
   doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
-  doc.text(`Invoice No: ${invNo}`,PW-MR,36,{align:'right'});
-  doc.text(`Date: ${invDate}`,PW-MR,41,{align:'right'});
+  doc.text(`Invoice No: ${invNo}`,cEnd,42,{align:'right'});
+  doc.text(`Date: ${invDate}`,cEnd,47,{align:'right'});
+}
+
+function drawTextLogo(doc){
+  doc.setFontSize(17);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+  doc.text('Hotel',PW/2,12,{align:'center'});
+  doc.text('OceanView',PW/2,20,{align:'center'});
+  doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+  doc.text('ULSAN, KOREA',PW/2,25,{align:'center'});
 }
 
 function pdfCompanyVessel(doc,company,vessel){
-  const y=38;
+  const y=52;
   doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
-  doc.text('Company',100,y,{align:'right'});
-  doc.text(company||'',110,y);
-  doc.text('Vessel Name',100,y+9,{align:'right'});
-  doc.text(vessel||'',110,y+9);
-  return y+20;
+  doc.text('Company',PW/2-8,y,{align:'right'});
+  doc.text(company||'',PW/2-4,y);
+  doc.text('Vessel Name',PW/2-8,y+9,{align:'right'});
+  doc.text(vessel||'',PW/2-4,y+9);
+  return y+22;
 }
 
 function pdfTableHeader(doc,y){
@@ -521,8 +596,13 @@ function pdfGuestRows(doc,guest,y){
     doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(20,20,20);
     if(dateStr)       doc.text(dateStr,(c1+c2)/2,y+5,{align:'center'});
     if(i===0)         doc.text(String(guest.roomNo||''),(c2+c3)/2,y+5,{align:'center'});
-    if(i===0)         doc.text(String(guest.guestName||''),(c3+c4)/2,y+5,{align:'center'});
-    doc.text(c.desc||'',c4+3,y+5);
+    if(i===0){
+      const nameMaxW=c4-c3-4;
+      const nm=trunc(String(guest.guestName||''),nameMaxW,doc);
+      doc.text(nm,(c3+c4)/2,y+5,{align:'center'});
+    }
+    const descMaxW=c5-c4-4;
+    doc.text(trunc(c.desc||'',descMaxW,doc),c4+3,y+5);
     // AMOUNT col: per-night rate for room only
     if(c.rate&&c.rate>0) doc.text(ff(c.rate),c6-2,y+5,{align:'right'});
     // TOTAL col: item total
