@@ -12,9 +12,14 @@ header{background:#fff;border-bottom:1px solid #ddd;padding:0 2rem;height:52px;d
 .logo{font-size:14px;font-weight:700;color:#111}
 .logo-sub{font-size:12px;color:#aaa}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1rem}
-.card{background:#fff;border-radius:16px;border:1px solid #e0ddd5;padding:2.5rem;width:100%;max-width:520px;text-align:center}
+.card{background:#fff;border-radius:16px;border:1px solid #e0ddd5;padding:2.5rem;width:100%;max-width:540px;text-align:center}
 .card-title{font-size:20px;font-weight:700;color:#111;margin-bottom:6px}
 .card-sub{font-size:13px;color:#888;margin-bottom:1.5rem;line-height:1.5}
+
+/* Mode toggle */
+.mode-row{display:flex;gap:8px;margin-bottom:1.5rem}
+.mode-btn{flex:1;padding:10px;border:2px solid #e0ddd5;border-radius:10px;background:#faf9f7;font-size:13px;font-weight:600;cursor:pointer;color:#888;transition:all 0.15s}
+.mode-btn.active{border-color:#2d6a4f;background:#edf7f2;color:#1a5a35}
 
 /* API Key */
 .api-section{background:#faf9f7;border:1px solid #e8e5de;border-radius:10px;padding:14px 16px;margin-bottom:1.5rem;text-align:left}
@@ -32,35 +37,41 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
 .api-status.ok{color:#2d6a4f}
 .api-status.err{color:#c0392b}
 
-.upload-zone{border:2px dashed #d0cdc5;border-radius:12px;padding:2.5rem 1.5rem;cursor:pointer;transition:all 0.15s;background:#faf9f7;margin-bottom:1.5rem}
+.upload-zone{border:2px dashed #d0cdc5;border-radius:12px;padding:2rem 1.5rem;cursor:pointer;transition:all 0.15s;background:#faf9f7;margin-bottom:1.5rem}
 .upload-zone:hover,.upload-zone.drag{border-color:#888;background:#f0ede8}
 .upload-zone.ready{border-color:#2d6a4f;background:#edf7f2;border-style:solid}
-.upload-icon{font-size:38px;margin-bottom:10px}
+.upload-icon{font-size:34px;margin-bottom:8px}
 .upload-main{font-size:14px;font-weight:600;color:#333;margin-bottom:4px}
 .upload-hint{font-size:12px;color:#999}
 #fileInput{display:none}
+
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-primary{background:#1a3a2a;color:#fff}
 .btn-primary:hover{background:#0f2a1d}
 .btn-primary:disabled{background:#bbb;cursor:not-allowed}
-.btn-download{background:#2d6a4f;color:#fff;margin-top:0}
+.btn-download{background:#2d6a4f;color:#fff}
 .btn-download:hover{background:#1a5a35}
 .btn-reset{background:transparent;color:#666;border:1px solid #ddd;margin-top:8px;font-size:13px;padding:10px}
 .btn-reset:hover{background:#f5f4f0}
+
 .progress{margin-top:1.5rem;display:none}
 .step{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;margin-bottom:6px;background:#f5f4f0;color:#888}
 .step.active{background:#e8f5ee;color:#1a5a35;font-weight:600}
 .step.done{background:#f0faf4;color:#2d6a4f}
 .step.err{background:#fdecea;color:#8a1a1a}
 .step-ic{width:20px;text-align:center;font-size:15px}
+
 .result{margin-top:1.5rem;display:none;text-align:left}
 .result-header{font-size:12px;font-weight:700;color:#2d6a4f;margin-bottom:10px;text-align:center}
-.chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:1rem}
+.summary-box{background:#f5f4f0;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px}
+.summary-box .row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e8e5de}
+.summary-box .row:last-child{border-bottom:none;font-weight:700;color:#1a5a35;margin-top:4px;padding-top:6px}
+.summary-box .row span{color:#888;font-size:11px}
+.info-chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
 .chip{background:#f5f4f0;border-radius:6px;padding:8px 10px}
-.chip.wide{grid-column:1/-1}
 .chip .lbl{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.04em}
 .chip .val{font-size:13px;font-weight:700;color:#111;margin-top:1px}
-.chip .val.total{color:#1a5a35;font-size:15px}
+
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
 .spinner-dark{border-color:rgba(45,106,79,0.3);border-top-color:#2d6a4f}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -74,8 +85,15 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
 <main>
   <div class="card">
     <div class="card-title">Bill → Invoice</div>
-    <div class="card-sub">Bill PDF 업로드 한 번으로<br>Invoice PDF가 자동 완성됩니다</div>
+    <div class="card-sub">Bill PDF 업로드 한 번으로 Invoice PDF가 자동 완성됩니다</div>
 
+    <!-- Mode -->
+    <div class="mode-row">
+      <button class="mode-btn active" id="modeSingle" onclick="setMode('single')">👤 단일 (1인)</button>
+      <button class="mode-btn" id="modeGroup" onclick="setMode('group')">👥 그룹 (다수인)</button>
+    </div>
+
+    <!-- API Key -->
     <div class="api-section">
       <div class="api-label">
         Anthropic API Key
@@ -91,7 +109,7 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
     <div class="upload-zone" id="zone" onclick="document.getElementById('fileInput').click()">
       <div class="upload-icon" id="zoneIcon">📋</div>
       <div class="upload-main" id="zoneMain">Bill PDF를 클릭하거나 드래그</div>
-      <div class="upload-hint" id="zoneHint">Hotel OceanView Bill 파일</div>
+      <div class="upload-hint" id="zoneHint" id="zoneHint">Hotel OceanView Bill 파일</div>
     </div>
     <input type="file" id="fileInput" accept=".pdf">
 
@@ -106,8 +124,9 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
     </div>
 
     <div class="result" id="result">
-      <div class="result-header">✅ Invoice 생성 완료</div>
-      <div class="chips" id="chips"></div>
+      <div class="result-header" id="resultHeader">✅ Invoice 생성 완료</div>
+      <div class="info-chips" id="infoChips"></div>
+      <div class="summary-box" id="summaryBox"></div>
       <button class="btn btn-download" id="dlBtn">📥 Invoice PDF 다운로드</button>
       <button class="btn btn-reset" onclick="reset()">다른 파일 처리하기</button>
     </div>
@@ -116,8 +135,18 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
 
 <script>
 let file = null, pdfBytes = null, filename = '';
+let currentMode = 'single';
 
-// ── API Key 관리 ─────────────────────────────────────────
+// ── Mode ─────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  document.getElementById('modeSingle').classList.toggle('active', m === 'single');
+  document.getElementById('modeGroup').classList.toggle('active', m === 'group');
+  document.getElementById('zoneHint').textContent =
+    m === 'group' ? '그룹 빌 PDF (여러 명 포함)' : 'Hotel OceanView Bill 파일';
+}
+
+// ── API Key ──────────────────────────────────────────────
 (function initKey() {
   const k = localStorage.getItem('ov_api_key') || '';
   if (k) {
@@ -131,7 +160,6 @@ let file = null, pdfBytes = null, filename = '';
 function saveKey() {
   const v = document.getElementById('apiKey').value.trim();
   if (!v.startsWith('sk-ant-')) {
-    document.getElementById('apiKey').classList.remove('ok');
     document.getElementById('apiKey').classList.add('err');
     document.getElementById('apiStatus').textContent = '올바른 Anthropic API 키를 입력해주세요 (sk-ant-로 시작)';
     document.getElementById('apiStatus').className = 'api-status err';
@@ -144,7 +172,7 @@ function saveKey() {
   document.getElementById('apiStatus').className = 'api-status ok';
 }
 
-// ── 파일 업로드 ──────────────────────────────────────────
+// ── File upload ──────────────────────────────────────────
 const zone = document.getElementById('zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
@@ -162,7 +190,7 @@ function setFile(f) {
   zone.classList.add('ready');
   document.getElementById('zoneIcon').textContent = '✅';
   document.getElementById('zoneMain').textContent = f.name;
-  document.getElementById('zoneHint').textContent = (f.size/1024).toFixed(0) + ' KB';
+  document.getElementById('zoneHint').textContent = (f.size / 1024).toFixed(0) + ' KB';
   document.getElementById('runBtn').disabled = false;
   document.getElementById('prog').style.display = 'none';
   document.getElementById('result').style.display = 'none';
@@ -171,8 +199,8 @@ function setFile(f) {
 function step(id, state, msg) {
   const el = document.getElementById(id);
   el.className = 'step ' + state;
-  const ic = state==='active' ? '<span class="spinner spinner-dark"></span>'
-           : state==='done'   ? '✅' : '❌';
+  const ic = state === 'active' ? '<span class="spinner spinner-dark"></span>'
+           : state === 'done'   ? '✅' : '❌';
   el.innerHTML = `<span class="step-ic">${ic}</span>${msg}`;
 }
 
@@ -180,17 +208,15 @@ function nextInvNo() {
   const t = new Date();
   const p = 'INV-' + t.getFullYear() + String(t.getMonth()+1).padStart(2,'0') + '-';
   const k = 'inv_' + p;
-  const n = (parseInt(localStorage.getItem(k)||'0') + 1);
+  const n = parseInt(localStorage.getItem(k)||'0') + 1;
   localStorage.setItem(k, n);
   return p + String(n).padStart(3,'0');
 }
 
+// ── Main run ─────────────────────────────────────────────
 async function run() {
   const apiKey = localStorage.getItem('ov_api_key') || document.getElementById('apiKey').value.trim();
-  if (!apiKey) {
-    alert('Anthropic API 키를 먼저 입력하고 저장해주세요.');
-    return;
-  }
+  if (!apiKey) { alert('Anthropic API 키를 먼저 입력하고 저장해주세요.'); return; }
   if (!file) return;
 
   const btn = document.getElementById('runBtn');
@@ -206,27 +232,38 @@ async function run() {
     step('s1', 'done', 'PDF 읽기 완료');
 
     step('s2', 'active', 'AI가 내용 분석 중...');
-    const data = await callClaude(b64, apiKey);
+    const data = currentMode === 'group'
+      ? await callClaudeGroup(b64, apiKey)
+      : await callClaudeSingle(b64, apiKey);
     step('s2', 'done', '데이터 추출 완료');
 
     step('s3', 'active', 'Invoice PDF 생성 중...');
     const invNo = nextInvNo();
     const invDate = new Date().toISOString().split('T')[0];
-    pdfBytes = buildPDF(data, invNo, invDate);
-    filename = `Invoice_${(data.vessel||'OceanView').replace(/\s+/g,'_')}_${invDate}.pdf`;
+
+    if (currentMode === 'group') {
+      pdfBytes = buildGroupPDF(data, invNo, invDate);
+      filename = `Invoice_${(data.vessel||'Group').replace(/\s+/g,'_')}_${invDate}.pdf`;
+      showResultGroup(data, invNo, invDate);
+    } else {
+      pdfBytes = buildSinglePDF(data, invNo, invDate);
+      filename = `Invoice_${(data.vessel||'OceanView').replace(/\s+/g,'_')}_${invDate}.pdf`;
+      showResultSingle(data, invNo, invDate);
+    }
     step('s3', 'done', 'Invoice PDF 생성 완료');
 
-    showResult(data, invNo, invDate);
   } catch(err) {
     ['s1','s2','s3'].forEach(id => {
-      if (document.getElementById(id).classList.contains('active')) step(id, 'err', '오류: ' + err.message);
+      if (document.getElementById(id).classList.contains('active'))
+        step(id, 'err', '오류: ' + err.message);
     });
-    btn.disabled = false;
-    btn.innerHTML = '<span>⚡</span><span>Invoice 자동 생성</span>';
   }
+  btn.disabled = false;
+  btn.innerHTML = '<span>⚡</span><span>Invoice 자동 생성</span>';
 }
 
-async function callClaude(b64, apiKey) {
+// ── Claude API ───────────────────────────────────────────
+async function callAPI(body, apiKey) {
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -235,26 +272,35 @@ async function callClaude(b64, apiKey) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
-      messages: [{role: 'user', content: [
-        {type: 'document', source: {type: 'base64', media_type: 'application/pdf', data: b64}},
-        {type: 'text', text: `This is a Hotel OceanView bill PDF. Extract all information and return ONLY valid JSON (no markdown, no explanation).
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${resp.status}`);
+  }
+  const j = await resp.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.content.map(c => c.text||'').join('').replace(/```json|```/g,'').trim();
+}
 
-The bill columns are: DATE, ROOM, RESTAURANT(LUNCH), RESTAURANT(DINNER), CAFÉ, LAUNDRY, OTHER, TOTAL, BALANCE
-Also extract: Company name, Vessel/Ship name, Room No, Guest Name, Entry/Check-in date.
+async function callClaudeSingle(b64, apiKey) {
+  const raw = await callAPI({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1500,
+    messages: [{role: 'user', content: [
+      {type: 'document', source: {type: 'base64', media_type: 'application/pdf', data: b64}},
+      {type: 'text', text: `This is a Hotel OceanView bill. Extract all information and return ONLY valid JSON (no markdown).
+
+Bill columns: DATE, ROOM, RESTAURANT(LUNCH), RESTAURANT(DINNER), CAFÉ, LAUNDRY, OTHER, TOTAL
+Also extract: Company name, Vessel/Ship name, Room No, Guest Name, check-in date.
 
 Rules:
-- Include only charges with non-zero amounts in "charges" array
-- Room charge description: "Room X nights" (X = number of nights from dates)
-- Food charges: use exact label like "Lunch", "Dinner", "Café"
-- Other charges: "Laundry", "Other" etc.
-- check_in = entry date (first date in bill), check_out = check_in + nights
+- Include only non-zero charges in "charges" array
+- Room: "Room X nights" (calculate nights from dates)
+- Food: "Lunch", "Dinner", "Café" as labeled
 - Amounts as integers (Korean Won)
 - Dates as YYYY-MM-DD
 
-Return this JSON structure only:
 {
   "company": "BAYSTAR SHIPPING",
   "vessel": "CONDOR",
@@ -268,42 +314,97 @@ Return this JSON structure only:
   ],
   "total": 120000
 }`}
-      ]}]
-    })
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${resp.status}`);
-  }
-
-  const j = await resp.json();
-  if (j.error) throw new Error(j.error.message);
-  const raw = j.content.map(c => c.text||'').join('').replace(/```json|```/g, '').trim();
+    ]}]
+  }, apiKey);
   return JSON.parse(raw);
 }
 
-function showResult(data, invNo, invDate) {
-  const fmt = n => Number(n).toLocaleString('ko-KR');
-  const chargesHtml = (data.charges||[]).map(c =>
-    `<div class="chip wide"><div class="lbl">${c.description}</div><div class="val">KRW ${fmt(c.amount)}</div></div>`
-  ).join('');
+async function callClaudeGroup(b64, apiKey) {
+  const raw = await callAPI({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
+    messages: [{role: 'user', content: [
+      {type: 'document', source: {type: 'base64', media_type: 'application/pdf', data: b64}},
+      {type: 'text', text: `This is a Hotel OceanView bill containing MULTIPLE guests across many pages.
+Extract ALL guests and return ONLY valid JSON (no markdown).
 
-  document.getElementById('chips').innerHTML =
+For each guest extract: room number, full name, check-in date, check-out date, and all non-zero charges.
+Bill columns: ROOM, RESTAURANT(LUNCH), RESTAURANT(DINNER), CAFÉ, LAUNDRY, OTHER
+Charge rules:
+- Room charge: "Room X nights" where X = number of nights
+- Food: "Lunch", "Dinner", "Café"
+- Other: "Laundry" etc.
+- Amounts as integers (Korean Won)
+- Dates as YYYY-MM-DD
+
+Return this exact structure:
+{
+  "company": "GIANT SHIPPING",
+  "vessel": "LPG/C ANTWERPEN",
+  "guests": [
+    {
+      "room_no": "301",
+      "guest_name": "LAGANZON DARIUS BERNALDEZ",
+      "check_in": "2026-06-04",
+      "check_out": "2026-06-10",
+      "charges": [
+        {"description": "Room 6 nights", "amount": 540000},
+        {"description": "Lunch", "amount": 40000},
+        {"description": "Dinner", "amount": 180000}
+      ],
+      "total": 760000
+    }
+  ],
+  "grand_total": 36000500
+}`}
+    ]}]
+  }, apiKey);
+  return JSON.parse(raw);
+}
+
+// ── Result display ────────────────────────────────────────
+function showResultSingle(data, invNo, invDate) {
+  const fmt = n => Number(n).toLocaleString('ko-KR');
+  document.getElementById('infoChips').innerHTML =
     [['Invoice No.', invNo], ['Date', invDate],
      ['Company', data.company||'-'], ['Vessel', data.vessel||'-'],
      ['Guest', data.guest_name||'-'], ['Room', data.room_no||'-'],
      ['Check-in', data.check_in||'-'], ['Check-out', data.check_out||'-']]
-    .map(([l,v]) => `<div class="chip"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('')
-    + chargesHtml
-    + `<div class="chip wide"><div class="lbl">Total</div><div class="val total">KRW ${fmt(data.total||0)}</div></div>`;
+    .map(([l,v]) => `<div class="chip"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('');
 
+  document.getElementById('summaryBox').innerHTML =
+    (data.charges||[]).map(c =>
+      `<div class="row"><span>${c.description}</span><b>KRW ${fmt(c.amount)}</b></div>`
+    ).join('') +
+    `<div class="row"><span>합계</span><b>KRW ${fmt(data.total||0)}</b></div>`;
+
+  document.getElementById('resultHeader').textContent = '✅ Invoice 생성 완료';
+  _showResult();
+}
+
+function showResultGroup(data, invNo, invDate) {
+  const fmt = n => Number(n).toLocaleString('ko-KR');
+  const guests = data.guests || [];
+  document.getElementById('infoChips').innerHTML =
+    [['Invoice No.', invNo], ['Date', invDate],
+     ['Company', data.company||'-'], ['Vessel', data.vessel||'-'],
+     ['인원', guests.length + '명']]
+    .map(([l,v]) => `<div class="chip"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('');
+
+  document.getElementById('summaryBox').innerHTML =
+    guests.map(g =>
+      `<div class="row"><span>${g.room_no} ${g.guest_name}</span><b>KRW ${fmt(g.total||0)}</b></div>`
+    ).join('') +
+    `<div class="row"><span>총합계</span><b>KRW ${fmt(data.grand_total||0)}</b></div>`;
+
+  document.getElementById('resultHeader').textContent = `✅ 그룹 Invoice 생성 완료 (${guests.length}명)`;
+  _showResult();
+}
+
+function _showResult() {
   document.getElementById('dlBtn').onclick = downloadPDF;
   document.getElementById('result').style.display = 'block';
   document.getElementById('prog').style.display = 'none';
-  const btn = document.getElementById('runBtn');
-  btn.disabled = false;
-  btn.innerHTML = '<span>⚡</span><span>Invoice 자동 생성</span>';
 }
 
 function downloadPDF() {
@@ -318,26 +419,24 @@ function reset() {
   zone.classList.remove('ready');
   document.getElementById('zoneIcon').textContent = '📋';
   document.getElementById('zoneMain').textContent = 'Bill PDF를 클릭하거나 드래그';
-  document.getElementById('zoneHint').textContent = 'Hotel OceanView Bill 파일';
+  document.getElementById('zoneHint').textContent = currentMode === 'group' ? '그룹 빌 PDF (여러 명 포함)' : 'Hotel OceanView Bill 파일';
   document.getElementById('fileInput').value = '';
   document.getElementById('runBtn').disabled = true;
   document.getElementById('prog').style.display = 'none';
   document.getElementById('result').style.display = 'none';
 }
 
-// ── PDF Builder ───────────────────────────────────────────────────────────────
-function buildPDF(data, invNo, invDate) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  const PW=210, ML=20, MR=20, CW=170;
-  const fmt = n => Number(n).toLocaleString('ko-KR');
+// ═══════════════════════════════════════════════════════════
+// PDF BUILDERS
+// ═══════════════════════════════════════════════════════════
 
-  function hr(y, lw=0.3, r=180, g=180, b=180) {
-    doc.setDrawColor(r,g,b); doc.setLineWidth(lw);
-    doc.line(ML, y, PW-MR, y);
-  }
+const PW = 210, ML = 20, MR = 20, CW = 170;
+const RH = 8;
+const c1=ML, c2=ML+28, c3=ML+48, c4=ML+88, c5=ML+140, c6=ML+162, cEnd=PW-MR;
 
-  // ── HEADER ──────────────────────────────────────────────
+function fmt(n) { return Number(n).toLocaleString('ko-KR'); }
+
+function drawHeader(doc, invNo, invDate) {
   doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
   doc.text('HOTEL ADRESS', ML, 13);
   doc.setFontSize(7);
@@ -355,39 +454,29 @@ function buildPDF(data, invNo, invDate) {
   doc.text('+82 .52. 235 . 7777', PW-MR, 17.5, {align:'right'});
   doc.text('hotelov@hanmail.net', PW-MR, 22, {align:'right'});
 
-  hr(29, 0.5, 160, 160, 160);
+  doc.setDrawColor(160,160,160); doc.setLineWidth(0.5);
+  doc.line(ML, 29, PW-MR, 29);
 
-  // ── INVOICE NO / DATE ────────────────────────────────────
   doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
   doc.text(`Invoice No: ${invNo}`, PW-MR, 36, {align:'right'});
   doc.text(`Date: ${invDate}`, PW-MR, 41, {align:'right'});
+}
 
-  // ── COMPANY / VESSEL ────────────────────────────────────
-  let y = 38;
+function drawCompanyVessel(doc, company, vessel, y) {
   doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
   doc.text('Company', 100, y, {align:'right'});
-  doc.text(data.company||'', 110, y, {align:'left'});
-  y += 9;
-  doc.text('Vessel Name', 100, y, {align:'right'});
-  doc.text(data.vessel||'', 110, y, {align:'left'});
+  doc.text(company||'', 110, y, {align:'left'});
+  doc.text('Vessel Name', 100, y+9, {align:'right'});
+  doc.text(vessel||'', 110, y+9, {align:'left'});
+  return y + 20;
+}
 
-  // ── TABLE ───────────────────────────────────────────────
-  y += 11;
-  const RH = 8;
-  const c1=ML, c2=ML+28, c3=ML+48, c4=ML+88, c5=ML+140, c6=ML+162, cEnd=PW-MR;
-
-  function vdivs(top, bottom) {
-    doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
-    [c2,c3,c4,c5,c6].forEach(x => doc.line(x, top, x, bottom));
-  }
-
-  // Header row
+function drawTableHeader(doc, y) {
   doc.setFillColor(225,225,225);
   doc.rect(ML, y, CW, RH, 'F');
   doc.setDrawColor(160,160,160); doc.setLineWidth(0.4);
   doc.rect(ML, y, CW, RH, 'S');
-  vdivs(y, y+RH);
-
+  drawVDivs(doc, y, y+RH);
   doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
   doc.text('DATE',        (c1+c2)/2,   y+5,   {align:'center'});
   doc.text('Room',        (c2+c3)/2,   y+3.5, {align:'center'});
@@ -396,68 +485,124 @@ function buildPDF(data, invNo, invDate) {
   doc.text('DESCRIPTION', (c4+c5)/2,   y+5,   {align:'center'});
   doc.text('AMOUNT',      (c5+c6)/2,   y+5,   {align:'center'});
   doc.text('TOTAL',       (c6+cEnd)/2, y+5,   {align:'center'});
-  y += RH;
+  return y + RH;
+}
 
-  // Data rows
-  const charges = data.charges || [];
-  const ci = data.check_in||'', co = data.check_out||'';
-  const rn = String(data.room_no||''), gn = data.guest_name||'';
-  let running = 0;
-  const mid = Math.ceil(charges.length / 2) - 1;
+function drawVDivs(doc, top, bottom) {
+  doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+  [c2,c3,c4,c5,c6].forEach(x => doc.line(x, top, x, bottom));
+}
 
-  charges.forEach((ch, i) => {
-    const amt = parseInt(ch.amount) || 0;
-    running += amt;
+function drawDataRow(doc, y, dateStr, roomNo, guestName, description, amount, runningTotal) {
+  doc.setDrawColor(190,190,190); doc.setLineWidth(0.3);
+  doc.rect(ML, y, CW, RH, 'S');
+  drawVDivs(doc, y, y+RH);
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(20,20,20);
+  if (dateStr) doc.text(dateStr, (c1+c2)/2, y+5, {align:'center'});
+  if (roomNo)  doc.text(roomNo,  (c2+c3)/2, y+5, {align:'center'});
+  if (guestName) doc.text(guestName, (c3+c4)/2, y+5, {align:'center'});
+  if (description) doc.text(description, c4+3, y+5);
+  if (amount > 0) doc.text(fmt(amount), c6-2, y+5, {align:'right'});
+  if (runningTotal > 0) doc.text(fmt(runningTotal), cEnd-2, y+5, {align:'right'});
+  return y + RH;
+}
 
-    doc.setDrawColor(190,190,190); doc.setLineWidth(0.3);
-    doc.rect(ML, y, CW, RH, 'S');
-    vdivs(y, y+RH);
-
-    doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(20,20,20);
-
-    // DATE column: first = check_in, middle = ~, last = check_out
-    if (charges.length === 1) {
-      doc.text(ci, (c1+c2)/2, y+5, {align:'center'});
-    } else if (i === 0) {
-      doc.text(ci, (c1+c2)/2, y+5, {align:'center'});
-    } else if (i === mid) {
-      doc.text('~', (c1+c2)/2, y+5, {align:'center'});
-    } else if (i === charges.length - 1) {
-      doc.text(co, (c1+c2)/2, y+5, {align:'center'});
-    }
-
-    // Room No / Name — first row only
-    if (i === 0) {
-      doc.text(rn, (c2+c3)/2, y+5, {align:'center'});
-      doc.text(gn, (c3+c4)/2, y+5, {align:'center'});
-    }
-
-    // Description
-    doc.text(ch.description||'', c4+3, y+5);
-
-    // AMOUNT col — each item
-    if (amt > 0) {
-      doc.text(fmt(amt), c6-2, y+5, {align:'right'});
-    }
-
-    // TOTAL col — running total
-    if (amt > 0) {
-      doc.text(fmt(running), cEnd-2, y+5, {align:'right'});
-    }
-
-    y += RH;
-  });
-
-  // Total row
+function drawTotalRow(doc, y, total) {
   doc.setFillColor(220,220,220);
   doc.rect(ML, y, CW, RH, 'F');
   doc.setDrawColor(120,120,120); doc.setLineWidth(0.5);
   doc.rect(ML, y, CW, RH, 'S');
   doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
   doc.text('Total.', 105, y+5.5, {align:'center'});
-  doc.text(fmt(data.total||running), cEnd-2, y+5.5, {align:'right'});
-  y += RH + 9;
+  doc.text(fmt(total), cEnd-2, y+5.5, {align:'right'});
+  return y + RH;
+}
 
+// ── Single invoice PDF ────────────────────────────────────
+function buildSinglePDF(data, invNo, invDate) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+
+  drawHeader(doc, invNo, invDate);
+  let y = drawCompanyVessel(doc, data.company, data.vessel, 38);
+  y = drawTableHeader(doc, y);
+
+  const charges = data.charges || [];
+  const ci = data.check_in||'', co = data.check_out||'';
+  const mid = Math.ceil(charges.length/2) - 1;
+  let running = 0;
+
+  charges.forEach((ch, i) => {
+    const amt = parseInt(ch.amount)||0;
+    running += amt;
+    const dateStr = charges.length===1 ? ci
+                  : i===0 ? ci : i===mid ? '~' : i===charges.length-1 ? co : '';
+    const roomNo   = i===0 ? String(data.room_no||'') : '';
+    const guestName = i===0 ? (data.guest_name||'') : '';
+    y = drawDataRow(doc, y, dateStr, roomNo, guestName, ch.description||'', amt, running);
+  });
+
+  y = drawTotalRow(doc, y, data.total||running);
+  y += 9;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+  doc.text('Thank you.', 105, y, {align:'center'});
+
+  return doc.output('arraybuffer');
+}
+
+// ── Group invoice PDF ─────────────────────────────────────
+function buildGroupPDF(data, invNo, invDate) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const PAGE_H = 297;
+  const BOTTOM_MARGIN = 20;
+  const HEADER_H = 68; // space used by header + company/vessel + table header
+
+  drawHeader(doc, invNo, invDate);
+  let y = drawCompanyVessel(doc, data.company, data.vessel, 38);
+  y = drawTableHeader(doc, y);
+
+  const guests = data.guests || [];
+  let grandRunning = 0;
+
+  guests.forEach(guest => {
+    const charges = guest.charges || [];
+    const rowsNeeded = charges.length;
+
+    // Check if we need a new page (need space for all rows of this guest)
+    if (y + rowsNeeded * RH + RH > PAGE_H - BOTTOM_MARGIN) {
+      doc.addPage();
+      drawHeader(doc, invNo, invDate);
+      y = drawCompanyVessel(doc, data.company, data.vessel, 38);
+      y = drawTableHeader(doc, y);
+    }
+
+    const ci = guest.check_in||'';
+    const co = guest.check_out||'';
+    const mid = Math.ceil(charges.length/2) - 1;
+    let guestRunning = grandRunning;
+
+    charges.forEach((ch, i) => {
+      const amt = parseInt(ch.amount)||0;
+      guestRunning += amt;
+      const dateStr = charges.length===1 ? ci
+                    : i===0 ? ci : i===mid ? '~' : i===charges.length-1 ? co : '';
+      const roomNo    = i===0 ? String(guest.room_no||'') : '';
+      // Split long names across 2 rows if needed (jsPDF has no word wrap in cells)
+      const guestName = i===0 ? (guest.guest_name||'') : '';
+      y = drawDataRow(doc, y, dateStr, roomNo, guestName, ch.description||'', amt, guestRunning);
+    });
+
+    grandRunning = guestRunning;
+  });
+
+  // Grand total row
+  if (y + RH > PAGE_H - BOTTOM_MARGIN) {
+    doc.addPage();
+    y = HEADER_H;
+  }
+  y = drawTotalRow(doc, y, data.grand_total || grandRunning);
+  y += 9;
   doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
   doc.text('Thank you.', 105, y, {align:'center'});
 
