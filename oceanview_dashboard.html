@@ -80,13 +80,20 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;
 <div class="upload-page" id="uploadPage">
   <div class="upload-card">
     <div class="card-title">Invoice Dashboard</div>
-    <div class="card-sub">호텔 빌 엑셀 파일을 업로드하면<br>룸별로 인보이스를 선택 생성합니다<br><br>✅ 완전 무료 &nbsp;·&nbsp; AI 불필요 &nbsp;·&nbsp; 오프라인 동작</div>
-    <div class="upload-zone" id="zone" onclick="document.getElementById('xlsxInput').click()">
+    <div class="card-sub">호텔 빌 엑셀 파일을 한 번만 선택하면<br>다음부터 자동으로 불러옵니다<br><br>✅ 완전 무료 &nbsp;·&nbsp; AI 불필요 &nbsp;·&nbsp; 오프라인 동작</div>
+    <div id="autoLoadMsg" style="display:none;margin-bottom:1rem;padding:10px 14px;background:#f0faf4;border-radius:8px;font-size:13px;color:#1a5a35;border:1px solid #b7dfca">
+      ⏳ 마지막 파일 불러오는 중...
+    </div>
+    <div class="upload-zone" id="zone" onclick="pickFile()">
       <div class="upload-icon">📊</div>
-      <div class="upload-main">BILL.xlsx 클릭하거나 드래그</div>
-      <div class="upload-hint">탭이 여러 개인 엑셀 파일</div>
+      <div class="upload-main" id="zoneMain">BILL.xlsx 클릭하거나 드래그</div>
+      <div class="upload-hint" id="zoneHint">탭이 여러 개인 엑셀 파일</div>
     </div>
     <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none">
+    <div id="savedFileBar" style="display:none;margin-top:14px;padding:10px 14px;background:#f5f4f0;border-radius:8px;font-size:12px;color:#666;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span>📌 <span id="savedFileName" style="font-weight:600;color:#333"></span> 저장됨</span>
+      <button class="btn btn-sm" style="font-size:11px;padding:4px 10px" onclick="clearSaved()">해제</button>
+    </div>
   </div>
 </div>
 
@@ -139,6 +146,113 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;
 <script>
 let allRooms = [], filtered = [];
 let meta = {company:'', vessel:'', filename:''};
+let savedFileHandle = null;
+
+// ── IndexedDB helpers ───────────────────────────────────
+const DB_NAME='oceanview_db', DB_STORE='handles', DB_KEY='bill_file';
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore(DB_STORE);
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=e=>rej(e.target.error);
+  });
+}
+async function saveHandle(handle){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readwrite');
+    tx.objectStore(DB_STORE).put(handle,DB_KEY);
+    tx.oncomplete=()=>res(); tx.onerror=e=>rej(e.target.error);
+  });
+}
+async function loadHandle(){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readonly');
+    const req=tx.objectStore(DB_STORE).get(DB_KEY);
+    req.onsuccess=e=>res(e.target.result||null);
+    req.onerror=e=>rej(e.target.error);
+  });
+}
+async function clearHandle(){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readwrite');
+    tx.objectStore(DB_STORE).delete(DB_KEY);
+    tx.oncomplete=()=>res(); tx.onerror=e=>rej(e.target.error);
+  });
+}
+
+// ── 시작 시 저장된 파일 자동 로드 ─────────────────────
+async function tryAutoLoad(){
+  if(!('showOpenFilePicker' in window)) return; // 지원 안 하면 skip
+  try {
+    const handle=await loadHandle();
+    if(!handle) return;
+    savedFileHandle=handle;
+    showSavedBar(handle.name);
+    document.getElementById('autoLoadMsg').style.display='block';
+    const perm=await handle.queryPermission({mode:'read'});
+    if(perm==='granted'){
+      const file=await handle.getFile();
+      readFile(file);
+    } else {
+      // 권한 없으면 사용자가 클릭해야 부여 가능
+      document.getElementById('autoLoadMsg').style.display='none';
+      document.getElementById('zoneMain').textContent='클릭하여 저장된 파일 다시 열기';
+      document.getElementById('zoneHint').textContent=handle.name;
+    }
+  } catch(e){ /* 조용히 무시 */ }
+}
+
+function showSavedBar(name){
+  const bar=document.getElementById('savedFileBar');
+  document.getElementById('savedFileName').textContent=name;
+  bar.style.display='flex';
+}
+
+async function clearSaved(){
+  await clearHandle();
+  savedFileHandle=null;
+  document.getElementById('savedFileBar').style.display='none';
+  document.getElementById('zoneMain').textContent='BILL.xlsx 클릭하거나 드래그';
+  document.getElementById('zoneHint').textContent='탭이 여러 개인 엑셀 파일';
+  showToast('저장된 파일 해제됨');
+}
+
+// ── 파일 선택 ───────────────────────────────────────────
+async function pickFile(){
+  // 저장된 핸들이 있으면 권한 요청 후 바로 열기
+  if(savedFileHandle){
+    try{
+      const perm=await savedFileHandle.requestPermission({mode:'read'});
+      if(perm==='granted'){
+        document.getElementById('autoLoadMsg').style.display='block';
+        const file=await savedFileHandle.getFile();
+        readFile(file);
+        return;
+      }
+    } catch(e){}
+  }
+  // File System Access API 지원 여부
+  if('showOpenFilePicker' in window){
+    try{
+      const [handle]=await window.showOpenFilePicker({
+        types:[{description:'Excel Files',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx','.xls']}}],
+        multiple:false
+      });
+      savedFileHandle=handle;
+      await saveHandle(handle);
+      showSavedBar(handle.name);
+      const file=await handle.getFile();
+      readFile(file);
+    } catch(e){ if(e.name!=='AbortError') alert('파일 열기 오류: '+e.message); }
+  } else {
+    // 폴백: 일반 input
+    document.getElementById('xlsxInput').click();
+  }
+}
 
 // ── 파일 업로드 ─────────────────────────────────────────
 const zone = document.getElementById('zone');
@@ -147,10 +261,14 @@ zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'));
 zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])});
 document.getElementById('xlsxInput').addEventListener('change', e=>{if(e.target.files[0])readFile(e.target.files[0])});
 
+// 페이지 로드 시 자동 로드 시도
+tryAutoLoad();
+
 function reloadFile(){
   document.getElementById('dashboard').style.display='none';
   document.getElementById('bottomBar').style.display='none';
   document.getElementById('uploadPage').style.display='flex';
+  tryAutoLoad();
 }
 
 function readFile(file){
@@ -231,6 +349,7 @@ function parseWB(wb, filename){
   meta={company,vessel,filename};
   filtered=[...allRooms];
 
+  document.getElementById('autoLoadMsg').style.display='none';
   document.getElementById('uploadPage').style.display='none';
   document.getElementById('dashboard').style.display='block';
   document.getElementById('bottomBar').style.display='flex';
