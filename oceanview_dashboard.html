@@ -114,7 +114,7 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;
     <div class="toolbar">
       <div style="display:flex;align-items:center;gap:10px">
         <input type="checkbox" id="chkAll" onchange="toggleAll(this.checked)" title="전체 선택/해제">
-        <input type="text" class="search-box" id="searchBox" placeholder="이름 또는 호실 검색..." oninput="filterRooms()">
+        <input type="text" class="search-box" id="searchBox" placeholder="이름 · 호실 · 회사 · 선명 검색..." oninput="filterRooms()">
       </div>
       <div class="sel-info" id="selInfo">0개 선택</div>
     </div>
@@ -404,7 +404,12 @@ function toggleAll(v){
 
 function filterRooms(){
   const q=document.getElementById('searchBox').value.toLowerCase();
-  filtered=allRooms.filter(r=>r.roomNo.toLowerCase().includes(q)||r.guestName.toLowerCase().includes(q));
+  filtered=allRooms.filter(r=>
+    r.roomNo.toLowerCase().includes(q)||
+    r.guestName.toLowerCase().includes(q)||
+    (r.company||'').toLowerCase().includes(q)||
+    (r.vessel||'').toLowerCase().includes(q)
+  );
   renderTable();
 }
 
