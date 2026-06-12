@@ -588,25 +588,32 @@ function vdivs(doc,top,bot){
 function pdfGuestRows(doc,guest,y){
   const ch=guest.charges||[];
   const n=ch.length;
+  const totalH=n*RH;
+
+  // ── 방 구분: 첫 줄 위에 진한 선 + 전체 블록 외곽선 ──
+  doc.setDrawColor(60,60,60);doc.setLineWidth(0.7);
+  doc.rect(ML,y,CW,totalH,'S');          // 굵은 외곽 박스
+  // 세로 구분선 (굵게)
+  doc.setLineWidth(0.5);
+  [c2,c3,c4,c5,c6].forEach(x=>doc.line(x,y,x,y+totalH));
+
   ch.forEach((c,i)=>{
     const dateStr=n===1?guest.checkIn:i===0?guest.checkIn:i===n-1?guest.checkOut:'~';
-    doc.setDrawColor(190,190,190);doc.setLineWidth(0.3);
-    doc.rect(ML,y,CW,RH,'S');
-    vdivs(doc,y,y+RH);
+    // 행 내부 가로선 (첫 줄 제외, 연하게)
+    if(i>0){
+      doc.setDrawColor(190,190,190);doc.setLineWidth(0.25);
+      doc.line(ML,y,cEnd,y);
+    }
     doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(20,20,20);
-    if(dateStr)       doc.text(dateStr,(c1+c2)/2,y+5,{align:'center'});
-    if(i===0)         doc.text(String(guest.roomNo||''),(c2+c3)/2,y+5,{align:'center'});
+    if(dateStr)  doc.text(dateStr,(c1+c2)/2,y+5,{align:'center'});
+    if(i===0)    doc.text(String(guest.roomNo||''),(c2+c3)/2,y+5,{align:'center'});
     if(i===0){
-      const nameMaxW=c4-c3-4;
-      const nm=trunc(String(guest.guestName||''),nameMaxW,doc);
+      const nm=trunc(String(guest.guestName||''),c4-c3-4,doc);
       doc.text(nm,(c3+c4)/2,y+5,{align:'center'});
     }
-    const descMaxW=c5-c4-4;
-    doc.text(trunc(c.desc||'',descMaxW,doc),c4+3,y+5);
-    // AMOUNT col: per-night rate for room only
+    doc.text(trunc(c.desc||'',c5-c4-4,doc),c4+3,y+5);
     if(c.rate&&c.rate>0) doc.text(ff(c.rate),c6-2,y+5,{align:'right'});
-    // TOTAL col: item total
-    if(c.amt>0) doc.text(ff(c.amt),cEnd-2,y+5,{align:'right'});
+    if(c.amt>0)          doc.text(ff(c.amt),cEnd-2,y+5,{align:'right'});
     y+=RH;
   });
   return y;
