@@ -80,20 +80,28 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#2d6a4f;
 <div class="upload-page" id="uploadPage">
   <div class="upload-card">
     <div class="card-title">Invoice Dashboard</div>
-    <div class="card-sub">호텔 빌 엑셀 파일을 한 번만 선택하면<br>다음부터 자동으로 불러옵니다<br><br>✅ 완전 무료 &nbsp;·&nbsp; AI 불필요 &nbsp;·&nbsp; 오프라인 동작</div>
-    <div id="autoLoadMsg" style="display:none;margin-bottom:1rem;padding:10px 14px;background:#f0faf4;border-radius:8px;font-size:13px;color:#1a5a35;border:1px solid #b7dfca">
-      ⏳ 마지막 파일 불러오는 중...
+    <div class="card-sub" id="cardSub">호텔 빌 엑셀 파일을 한 번만 선택하면<br>다음부터 클릭 한 번으로 바로 열립니다<br><br>✅ 완전 무료 &nbsp;·&nbsp; AI 불필요 &nbsp;·&nbsp; 오프라인 동작</div>
+
+    <!-- 저장된 파일 있을 때: 원클릭 재열기 버튼 -->
+    <div id="quickOpenBox" style="display:none;margin-bottom:1rem">
+      <button onclick="pickFile()" style="width:100%;padding:18px;background:#1a3a2a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+        <span style="font-size:22px">📂</span>
+        <span id="quickOpenLabel">마지막 파일 열기</span>
+      </button>
+      <div style="margin-top:10px;text-align:center">
+        <button onclick="newFile()" style="background:none;border:none;font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline">다른 파일 선택</button>
+        &nbsp;·&nbsp;
+        <button onclick="clearSaved()" style="background:none;border:none;font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline">연결 해제</button>
+      </div>
     </div>
-    <div class="upload-zone" id="zone" onclick="pickFile()">
+
+    <!-- 저장된 파일 없을 때: 드래그 업로드 영역 -->
+    <div class="upload-zone" id="zone" style="display:none" onclick="pickFile()">
       <div class="upload-icon">📊</div>
       <div class="upload-main" id="zoneMain">BILL.xlsx 클릭하거나 드래그</div>
       <div class="upload-hint" id="zoneHint">탭이 여러 개인 엑셀 파일</div>
     </div>
     <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none">
-    <div id="savedFileBar" style="display:none;margin-top:14px;padding:10px 14px;background:#f5f4f0;border-radius:8px;font-size:12px;color:#666;display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <span>📌 <span id="savedFileName" style="font-weight:600;color:#333"></span> 저장됨</span>
-      <button class="btn btn-sm" style="font-size:11px;padding:4px 10px" onclick="clearSaved()">해제</button>
-    </div>
   </div>
 </div>
 
@@ -189,39 +197,44 @@ async function clearHandle(){
 
 // ── 시작 시 저장된 파일 자동 로드 ─────────────────────
 async function tryAutoLoad(){
-  if(!('showOpenFilePicker' in window)) return; // 지원 안 하면 skip
+  if(!('showOpenFilePicker' in window)){
+    // 미지원 브라우저: 기본 업로드 영역만 표시
+    showUploadZone(); return;
+  }
   try {
     const handle=await loadHandle();
-    if(!handle) return;
+    if(!handle){ showUploadZone(); return; }
     savedFileHandle=handle;
-    showSavedBar(handle.name);
-    document.getElementById('autoLoadMsg').style.display='block';
+    // 저장된 파일 있음 → 원클릭 버튼 표시
+    document.getElementById('quickOpenLabel').textContent=`${handle.name} 열기`;
+    document.getElementById('quickOpenBox').style.display='block';
+    document.getElementById('zone').style.display='none';
+    // 권한이 이미 있으면 자동 로드
     const perm=await handle.queryPermission({mode:'read'});
     if(perm==='granted'){
       const file=await handle.getFile();
       readFile(file);
-    } else {
-      // 권한 없으면 사용자가 클릭해야 부여 가능
-      document.getElementById('autoLoadMsg').style.display='none';
-      document.getElementById('zoneMain').textContent='클릭하여 저장된 파일 다시 열기';
-      document.getElementById('zoneHint').textContent=handle.name;
     }
-  } catch(e){ /* 조용히 무시 */ }
+  } catch(e){ showUploadZone(); }
 }
 
-function showSavedBar(name){
-  const bar=document.getElementById('savedFileBar');
-  document.getElementById('savedFileName').textContent=name;
-  bar.style.display='flex';
+function showUploadZone(){
+  document.getElementById('quickOpenBox').style.display='none';
+  document.getElementById('zone').style.display='block';
 }
 
 async function clearSaved(){
   await clearHandle();
   savedFileHandle=null;
-  document.getElementById('savedFileBar').style.display='none';
-  document.getElementById('zoneMain').textContent='BILL.xlsx 클릭하거나 드래그';
-  document.getElementById('zoneHint').textContent='탭이 여러 개인 엑셀 파일';
-  showToast('저장된 파일 해제됨');
+  document.getElementById('quickOpenBox').style.display='none';
+  showUploadZone();
+  showToast('연결 해제됨');
+}
+
+function newFile(){
+  savedFileHandle=null;
+  showUploadZone();
+  pickFile();
 }
 
 // ── 파일 선택 ───────────────────────────────────────────
@@ -231,7 +244,6 @@ async function pickFile(){
     try{
       const perm=await savedFileHandle.requestPermission({mode:'read'});
       if(perm==='granted'){
-        document.getElementById('autoLoadMsg').style.display='block';
         const file=await savedFileHandle.getFile();
         readFile(file);
         return;
