@@ -96,14 +96,14 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 
     <!-- API Key -->
     <div class="api-section">
       <div class="api-label">
-        Anthropic API Key
-        <a href="https://console.anthropic.com/settings/keys" target="_blank">키 발급 →</a>
+        Gemini API Key
+        <a href="https://aistudio.google.com/apikey" target="_blank">키 발급 →</a>
       </div>
       <div class="api-row">
-        <input type="password" class="api-input" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+        <input type="password" class="api-input" id="apiKey" placeholder="AIza..." autocomplete="off">
         <button class="api-save" onclick="saveKey()">저장</button>
       </div>
-      <div class="api-status" id="apiStatus">API 키를 입력하면 브라우저에 안전하게 저장됩니다</div>
+      <div class="api-status" id="apiStatus">Gemini API 키를 입력하면 브라우저에 안전하게 저장됩니다 (무료)</div>
     </div>
 
     <div class="upload-zone" id="zone" onclick="document.getElementById('fileInput').click()">
@@ -159,9 +159,9 @@ function setMode(m) {
 
 function saveKey() {
   const v = document.getElementById('apiKey').value.trim();
-  if (!v.startsWith('sk-ant-')) {
+  if (!v.startsWith('AIza')) {
     document.getElementById('apiKey').classList.add('err');
-    document.getElementById('apiStatus').textContent = '올바른 Anthropic API 키를 입력해주세요 (sk-ant-로 시작)';
+    document.getElementById('apiStatus').textContent = '올바른 Gemini API 키를 입력해주세요 (AIza로 시작)';
     document.getElementById('apiStatus').className = 'api-status err';
     return;
   }
@@ -216,7 +216,7 @@ function nextInvNo() {
 // ── Main run ─────────────────────────────────────────────
 async function run() {
   const apiKey = localStorage.getItem('ov_api_key') || document.getElementById('apiKey').value.trim();
-  if (!apiKey) { alert('Anthropic API 키를 먼저 입력하고 저장해주세요.'); return; }
+  if (!apiKey) { alert('Gemini API 키를 먼저 입력하고 저장해주세요.'); return; }
   if (!file) return;
 
   const btn = document.getElementById('runBtn');
@@ -262,34 +262,31 @@ async function run() {
   btn.innerHTML = '<span>⚡</span><span>Invoice 자동 생성</span>';
 }
 
-// ── Claude API ───────────────────────────────────────────
-async function callAPI(body, apiKey) {
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+// ── Gemini API ────────────────────────────────────────────
+async function callGemini(prompt, b64, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const resp = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify(body)
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{parts: [
+        {inline_data: {mime_type: 'application/pdf', data: b64}},
+        {text: prompt}
+      ]}],
+      generationConfig: {temperature: 0, maxOutputTokens: 8000}
+    })
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.error?.message || `HTTP ${resp.status}`);
   }
   const j = await resp.json();
-  if (j.error) throw new Error(j.error.message);
-  return j.content.map(c => c.text||'').join('').replace(/```json|```/g,'').trim();
+  const text = j.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return text.replace(/```json|```/g,'').trim();
 }
 
 async function callClaudeSingle(b64, apiKey) {
-  const raw = await callAPI({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1500,
-    messages: [{role: 'user', content: [
-      {type: 'document', source: {type: 'base64', media_type: 'application/pdf', data: b64}},
-      {type: 'text', text: `This is a Hotel OceanView bill. Extract all information and return ONLY valid JSON (no markdown).
+  const raw = await callGemini(`This is a Hotel OceanView bill. Extract all information and return ONLY valid JSON (no markdown).
 
 Bill columns: DATE, ROOM, RESTAURANT(LUNCH), RESTAURANT(DINNER), CAFÉ, LAUNDRY, OTHER, TOTAL
 Also extract: Company name, Vessel/Ship name, Room No, Guest Name, check-in date.
@@ -313,19 +310,12 @@ Rules:
     {"description": "Dinner", "amount": 30000}
   ],
   "total": 120000
-}`}
-    ]}]
-  }, apiKey);
+}`, b64, apiKey);
   return JSON.parse(raw);
 }
 
 async function callClaudeGroup(b64, apiKey) {
-  const raw = await callAPI({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 8000,
-    messages: [{role: 'user', content: [
-      {type: 'document', source: {type: 'base64', media_type: 'application/pdf', data: b64}},
-      {type: 'text', text: `This is a Hotel OceanView bill containing MULTIPLE guests across many pages.
+  const raw = await callGemini(`This is a Hotel OceanView bill containing MULTIPLE guests across many pages.
 Extract ALL guests and return ONLY valid JSON (no markdown).
 
 For each guest extract: room number, full name, check-in date, check-out date, and all non-zero charges.
@@ -356,9 +346,7 @@ Return this exact structure:
     }
   ],
   "grand_total": 36000500
-}`}
-    ]}]
-  }, apiKey);
+}`, b64, apiKey);
   return JSON.parse(raw);
 }
 
