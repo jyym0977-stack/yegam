@@ -1,0 +1,45 @@
+===== OceanView Invoice Dashboard 설치 방법 =====
+
+[ 필요한 것 ]
+- Node.js (무료): https://nodejs.org 에서 "LTS" 버전 다운로드 및 설치
+
+[ 폴더 구조 ]
+바탕화면/
+  BILL.xlsx          ← 엑셀 파일 (바탕화면에 있어야 함)
+  OceanView Invoice/ ← 이 폴더
+    index.html
+    server.js
+    package.json
+    시작.vbs
+    설치방법.txt
+
+[ 최초 1회 설치 ]
+1. Node.js 설치 완료 후
+2. 이 폴더(OceanView Invoice)에서 마우스 우클릭
+   → "터미널에서 열기" 또는 "PowerShell 창 열기"
+3. 다음 명령어 입력:
+   npm install
+4. 설치 완료!
+
+[ 매일 사용법 ]
+1. "시작.vbs" 더블클릭
+2. Chrome 자동 열림 → 대시보드 바로 사용
+3. 다 쓰면 창 닫기
+
+[ 바탕화면 아이콘 만들기 ]
+1. "시작.vbs" 마우스 우클릭
+2. "바로 가기 만들기" 클릭
+3. 생성된 바로가기를 바탕화면으로 이동
+4. 바로가기 우클릭 → "속성" → "아이콘 변경"으로 원하는 아이콘 선택
+
+[ BILL.xlsx 업데이트 시 ]
+- 파일 내용을 수정하고 저장
+- 대시보드에서 "🔄 새로고침" 버튼 클릭
+- 바로 최신 데이터 반영됨 (재시작 불필요)
+
+[ BILL.xlsx 위치 변경 시 ]
+- server.js 파일을 메모장으로 열어서
+- BILL_PATH 줄을 원하는 경로로 수정
+  예) const BILL_PATH = 'D:\\호텔\\BILL.xlsx';
+
+=====================================
