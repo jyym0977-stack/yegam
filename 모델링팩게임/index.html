@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>모델링팩 황금 레시피 게임 — 예감마켓</title>
+<meta property="og:title" content="모델링팩 황금 레시피 게임">
+<meta property="og:description" content="질문 3개로 내 피부 맞춤 레시피 찾고, 직접 섞어보세요!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5ecd7; --bg-deep:#e8d9b8; --panel:#faf3e0; --panel-line:#e3d3ac;
+  --brown:#5c4632; --brown-lt:#8a6f52; --btn:#5c4632; --btn-txt:#fdf8ec;
+  --accent:#e8926f; --pill:#fff8e8; --red:#c0554f;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  font-family:'Jua','Apple SD Gothic Neo',sans-serif;
+  background:#d9c8a0; color:var(--brown);
+  display:flex; justify-content:center; min-height:100dvh;
+}
+#app{
+  width:100%; max-width:430px; min-height:100dvh; background:var(--bg);
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 0 40px rgba(90,70,40,.35);
+}
+.screen{display:none; flex:1; flex-direction:column; padding:22px 20px 34px; animation:fadein .35s ease;}
+.screen.on{display:flex;}
+@keyframes fadein{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+
+/* 공통 파츠 */
+.btn{
+  display:block; width:100%; border:none; cursor:pointer; text-align:center;
+  font-family:inherit; font-size:19px; color:var(--btn-txt); background:var(--btn);
+  padding:16px; border-radius:40px; box-shadow:0 5px 0 #3e2f20; margin-top:10px;
+  transition:transform .08s;
+}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 #3e2f20;}
+.btn.ghost{background:var(--pill); color:var(--brown); box-shadow:0 5px 0 #d8c69a; border:2px solid var(--panel-line);}
+.bubble-row{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;}
+.bubble-row img{width:64px; height:64px; object-fit:contain; flex:none; filter:drop-shadow(0 3px 4px rgba(90,70,40,.25));}
+.bubble{
+  background:#fffdf4; border:2px solid var(--panel-line); border-radius:16px;
+  padding:10px 14px; font-size:15.5px; line-height:1.5; position:relative; flex:1;
+}
+.bubble::before{
+  content:""; position:absolute; left:-9px; top:22px; width:14px; height:14px;
+  background:#fffdf4; border-left:2px solid var(--panel-line); border-bottom:2px solid var(--panel-line);
+  transform:rotate(45deg);
+}
+.small{font-size:12.5px; color:var(--brown-lt);}
+
+/* 인트로 */
+#s-intro{justify-content:flex-start;}
+.logo-area{text-align:center; margin:14px 0 6px;}
+.logo-tag{display:inline-block; background:var(--accent); color:#fff; font-size:13px; padding:4px 14px; border-radius:20px; transform:rotate(-3deg);}
+h1.logo{font-size:44px; margin:10px 0 2px; line-height:1.12; letter-spacing:1px; text-shadow:2px 2px 0 #fff;}
+.logo-sub{font-size:15px; color:var(--brown-lt); margin-bottom:10px;}
+.hero{position:relative; text-align:center; margin:6px 0 16px;}
+.hero img{width:150px; animation:bob 2.6s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)}}
+.hero .float{position:absolute; font-size:28px; animation:bob 3s ease-in-out infinite;}
+.name-input{
+  width:100%; border:2px solid var(--panel-line); border-radius:30px; background:#fff;
+  padding:14px 18px; font-size:16px; font-family:inherit; color:var(--brown); margin-top:8px;
+}
+.name-input:focus{outline:none; border-color:var(--accent);}
+.counter{display:flex; justify-content:center; gap:26px; margin-top:16px; text-align:center;}
+.counter b{display:block; font-size:20px;}
+.counter span{font-size:12.5px; color:var(--brown-lt);}
+
+/* 질문 */
+.q-pill{align-self:center; background:var(--accent); color:#fff; font-size:14px; padding:5px 18px; border-radius:20px; margin-bottom:16px;}
+.q-text{font-size:26px; text-align:center; line-height:1.35; white-space:pre-line; margin:4px 0 22px;}
+.opt{
+  width:100%; text-align:left; font-family:inherit; font-size:16.5px; color:var(--brown);
+  background:var(--pill); border:2px solid var(--panel-line); border-radius:40px;
+  padding:15px 20px; margin-bottom:11px; cursor:pointer; display:flex; gap:10px; align-items:center;
+  transition:transform .08s;
+}
+.opt:active{transform:scale(.97); background:#fff;}
+.back{position:absolute; top:16px; left:16px; background:none; border:none; font-size:22px; color:var(--brown-lt); cursor:pointer; font-family:inherit;}
+
+/* 로딩 */
+#s-loading{justify-content:center; align-items:center; text-align:center;}
+.dots span{display:inline-block; width:10px; height:10px; margin:0 4px; border-radius:50%; background:var(--brown); animation:dot 1s infinite;}
+.dots span:nth-child(2){animation-delay:.15s} .dots span:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,100%{transform:translateY(0); opacity:.4} 50%{transform:translateY(-8px); opacity:1}}
+
+/* 결과 */
+.r-card{background:var(--panel); border:2px solid var(--panel-line); border-radius:22px; padding:22px 18px; text-align:center; box-shadow:0 6px 0 rgba(160,130,80,.18);}
+.r-sub{display:inline-block; background:var(--pill); border:1.5px solid var(--panel-line); font-size:13px; padding:4px 14px; border-radius:20px; color:var(--brown-lt);}
+.r-name{font-size:29px; margin:10px 0 2px;}
+.r-emoji{font-size:52px; margin:6px 0;}
+.r-ratio{
+  display:inline-block; background:var(--brown); color:var(--btn-txt); font-size:16px;
+  padding:7px 18px; border-radius:30px; margin:8px 0;
+}
+.r-reason{font-size:15px; line-height:1.6; margin:8px 4px;}
+.r-warn{background:#fbe3df; border:1.5px solid #eab8b0; color:var(--red); font-size:13.5px; line-height:1.5; border-radius:14px; padding:10px 12px; margin-top:10px;}
+
+/* 케어 순서 (결과 카드 하단 정적 표시) */
+.care-mini{
+  background:var(--pill); border:2px solid var(--panel-line); border-radius:16px;
+  padding:12px 14px; margin-top:12px; font-size:13.5px; line-height:1.9; color:var(--brown);
+}
+.care-mini b{display:block; font-size:14px; color:var(--accent); margin-bottom:2px;}
+
+/* 믹싱 시뮬레이션 */
+#s-mix{padding-bottom:20px;}
+.mix-head{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.mix-step-pill{background:var(--brown); color:var(--btn-txt); font-size:13px; padding:4px 12px; border-radius:16px;}
+.mix-title{font-size:20px;}
+.mix-stage{
+  position:relative; height:330px; background:linear-gradient(#f9f2df 65%, var(--bg-deep) 65%);
+  border:2px solid var(--panel-line); border-radius:20px; overflow:hidden; touch-action:none;
+  user-select:none; -webkit-user-select:none;
+}
+/* 볼 */
+.bowl-wrap{position:absolute; left:50%; bottom:26px; transform:translateX(-50%); width:230px; height:150px;}
+.bowl{
+  position:absolute; inset:0; border-radius:0 0 115px 115px / 0 0 120px 120px;
+  background:linear-gradient(#fffefb,#f0ebdd); border:4px solid #ddd5c2; border-top:none;
+  overflow:hidden; box-shadow:inset 0 -14px 22px rgba(190,180,150,.25);
+}
+.bowl-rim{position:absolute; top:-7px; left:-6px; right:-6px; height:16px; border-radius:50%; background:#f7f3e8; border:4px solid #ddd5c2;}
+.fill{position:absolute; left:0; right:0; bottom:0; height:0%; transition:height .25s;}
+#fill-powder{
+  background:
+    radial-gradient(circle at 20% 30%, #a8a06e 1.5px, transparent 2px),
+    radial-gradient(circle at 60% 60%, #a8a06e 1.5px, transparent 2px),
+    radial-gradient(circle at 85% 25%, #a8a06e 1.5px, transparent 2px),
+    #c9c193;
+  background-size:26px 22px, 30px 26px, 34px 24px, auto;
+  border-radius:45% 45% 0 0 / 26% 26% 0 0;
+}
+#fill-liquid{opacity:.85;}
+#fill-paste{background:#efe9dc; display:none;}
+.half-line{
+  position:absolute; left:6px; right:6px; bottom:38%; border-top:2px dashed var(--red);
+  font-size:11px; color:var(--red); text-align:right; display:none;
+}
+.half-line span{background:#fffdf4; padding:0 5px; border-radius:8px; position:relative; top:-9px;}
+.powder-heap{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:80%; height:0; border-radius:50% 50% 0 0; background:#efe9db; transition:height .3s;}
+/* 도구 버튼 */
+.tools{display:flex; gap:10px; margin-top:12px;}
+.tool{
+  flex:1; font-family:inherit; font-size:15px; color:var(--brown); background:var(--pill);
+  border:2px solid var(--panel-line); border-radius:18px; padding:12px 8px; cursor:pointer;
+  text-align:center; line-height:1.3;
+}
+.tool b{display:block; font-size:22px;}
+.tool:disabled{opacity:.35;}
+.tool.glow{border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,146,111,.3); animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(232,146,111,.25)} 50%{box-shadow:0 0 0 7px rgba(232,146,111,.12)}}
+/* 스패츌러 (실물: 납작한 흰색 실리콘) */
+#spatula{
+  position:absolute; display:none; pointer-events:none; z-index:5; width:28px;
+  transform:translate(-50%,-88%) rotate(16deg); transform-origin:50% 90%;
+  filter:drop-shadow(0 3px 3px rgba(90,70,40,.22));
+}
+#spatula .handle{width:11px; height:46px; margin:0 auto -5px; background:#fbfaf5; border:2px solid #dcd5c5; border-radius:7px;}
+#spatula .blade{width:28px; height:56px; background:#fdfcf8; border:2px solid #dcd5c5; border-radius:14px / 22px;}
+#spatula .blob{
+  display:none; position:absolute; left:50%; bottom:4px; transform:translateX(-50%);
+  width:20px; height:16px; border-radius:50%; background:#e9e2cf;
+}
+/* 떨어지는 반죽 */
+#drop-blob{
+  display:none; position:absolute; left:50%; top:30%; transform:translateX(-50%);
+  width:24px; height:20px; border-radius:50%; z-index:4; pointer-events:none;
+}
+/* 붓는 스트림 — 가루는 오른쪽, 물은 왼쪽에서 */
+#stream{position:absolute; top:40px; transform:translateX(-50%); width:10px; height:0; border-radius:6px; transition:height .1s; z-index:4;}
+#pour-src{position:absolute; top:6px; transform:translateX(-50%); font-size:34px; display:none; z-index:4;}
+#pour-src.tilt-l{transform:translateX(-50%) rotate(-35deg);}
+#pour-src.tilt-r{transform:translateX(-50%) rotate(35deg);}
+/* 진행 뱃지 */
+.stir-gauge{position:absolute; top:10px; right:10px; background:#fffdf4; border:2px solid var(--panel-line); border-radius:14px; padding:5px 10px; font-size:13px; display:none;}
+/* 젓기 화살표 (섞이는 중 표시) */
+#stir-arrow{
+  position:absolute; left:50%; bottom:58px; transform:translateX(-50%);
+  width:88px; height:88px; z-index:4; display:none; pointer-events:none; opacity:.9;
+  filter:drop-shadow(0 2px 3px rgba(90,70,40,.3));
+}
+#stir-arrow.idle{animation:spinhint 2.6s linear infinite;}
+@keyframes spinhint{from{transform:translateX(-50%) rotate(0deg);} to{transform:translateX(-50%) rotate(360deg);}}
+/* 토스트 */
+#toast{
+  position:absolute; left:50%; top:44%; transform:translate(-50%,-50%) scale(.9); z-index:8;
+  background:rgba(92,70,50,.92); color:#fff; font-size:16px; padding:10px 18px; border-radius:30px;
+  opacity:0; pointer-events:none; transition:all .25s; text-align:center; white-space:nowrap;
+}
+#toast.show{opacity:1; transform:translate(-50%,-50%) scale(1);}
+/* 얼굴 도포 */
+.face-scene{display:none; position:absolute; inset:0; background:var(--bg); text-align:center; padding-top:30px; z-index:6;}
+.face{font-size:110px; position:relative; display:inline-block;}
+.mask-layer{
+  position:absolute; left:50%; top:54%; transform:translate(-50%,-50%); width:0px; height:0px;
+  border-radius:48%; transition:all 1.2s ease; opacity:.9;
+}
+.timer-txt{font-size:26px; margin-top:14px;}
+
+/* 인증서 */
+#s-cert{align-items:stretch;}
+.cert-hang{text-align:center; font-size:26px; margin-bottom:-6px; color:#8a6f52;}
+.cert{
+  background:#fbf3da; border:3px solid #d9c493; border-radius:8px; padding:22px 18px;
+  position:relative; box-shadow:0 8px 20px rgba(90,70,40,.2);
+}
+.cert::before{content:""; position:absolute; inset:7px; border:1.5px dashed #cdb684; border-radius:5px; pointer-events:none;}
+.cert h2{text-align:center; font-size:23px; margin:2px 0 4px; border-bottom:2px solid #d9c493; padding-bottom:10px;}
+.stamp{
+  position:absolute; top:14px; right:14px; width:64px; height:64px; border:3px solid var(--red);
+  border-radius:50%; color:var(--red); font-size:11px; display:flex; align-items:center; justify-content:center;
+  text-align:center; transform:rotate(12deg); opacity:.85; line-height:1.2; padding:6px;
+}
+.cert-row{display:flex; gap:14px; align-items:center; margin:14px 0;}
+.cert-row img{width:86px; height:86px; object-fit:contain;}
+.cert-info{font-size:15.5px; line-height:1.85;}
+.cert-info b{color:var(--accent);}
+.cert-line{background:#f3e8c8; border-radius:10px; font-size:13.5px; padding:10px 12px; line-height:1.5; font-family:'Gowun Dodum',sans-serif;}
+.cert-foot{display:flex; justify-content:space-between; font-size:12.5px; color:var(--brown-lt); margin-top:12px;}
+.save-hint{text-align:center; font-size:13.5px; color:#a4822a; margin:10px 0 4px;}
+.share-row{display:flex; justify-content:center; gap:14px; margin:10px 0 4px;}
+.share-btn{
+  width:52px; height:52px; border-radius:50%; border:none; background:var(--brown); color:#fff;
+  font-size:21px; cursor:pointer; font-family:inherit;
+}
+.notice{font-size:11px; color:#a49677; text-align:center; margin-top:14px; line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 인트로 -->
+  <section class="screen on" id="s-intro">
+    <div class="logo-area">
+      <span class="logo-tag">물 비율 실패 없는</span>
+      <h1 class="logo">모델링팩<br>황금 레시피</h1>
+      <div class="logo-sub">질문 3개로 레시피 찾고, 직접 섞어봐요!</div>
+    </div>
+    <div class="hero">
+      <span class="float" style="left:16%; top:0;">💧</span>
+      <span class="float" style="right:14%; top:12%; animation-delay:.5s;">🥣</span>
+      <span class="float" style="left:22%; bottom:0; animation-delay:1s;">🌿</span>
+      <img src="img/potato.png" alt="예감 감자">
+    </div>
+    <div class="bubble-row">
+      <div class="bubble">모델링팩 실패 원인 1위가 뭔지 알아? 바로 <b>물 비율</b>! 오늘 나랑 같이 황금비를 손에 익혀보자궁 🥔</div>
+    </div>
+    <input class="name-input" id="name-input" maxlength="8" placeholder="이름을 입력해주세요 (인증서에 들어가요)">
+    <button class="btn" onclick="startQuiz()">시작하기</button>
+    <div class="counter">
+      <div><b id="cnt-people">1,024</b><span>참여자 수</span></div>
+      <div><b>4가지</b><span>맞춤 레시피</span></div>
+    </div>
+  </section>
+
+  <!-- 질문 -->
+  <section class="screen" id="s-quiz">
+    <button class="back" onclick="backQuiz()">〈</button>
+    <div class="q-pill" id="q-pill">1 / 3</div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-opts"></div>
+  </section>
+
+  <!-- 로딩 -->
+  <section class="screen" id="s-loading">
+    <img src="img/potato.png" style="width:110px; animation:bob 1.2s ease-in-out infinite;">
+    <p style="font-size:20px; margin:16px 0 10px;"><span id="loading-name"></span>피부에 맞는<br>레시피 조제 중...</p>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </section>
+
+  <!-- 결과 -->
+  <section class="screen" id="s-result">
+    <div class="r-card">
+      <span class="r-sub" id="r-sub"></span>
+      <div class="r-emoji" id="r-emoji"></div>
+      <div class="r-name" id="r-name"></div>
+      <div class="r-ratio" id="r-ratio"></div>
+      <div class="r-reason" id="r-reason"></div>
+      <div class="r-warn" id="r-warn" style="display:none;"></div>
+    </div>
+    <div class="care-mini" id="care-mini"></div>
+    <div class="bubble-row" style="margin-top:14px;">
+      <img src="img/potato.png" alt="">
+      <div class="bubble" id="r-bubble">순서 기억해뒀지? 그럼 바로 <b>섞으러 가자궁</b>!</div>
+    </div>
+    <div style="flex:1"></div>
+    <button class="btn" onclick="startMix()">직접 섞어보기 🥣</button>
+  </section>
+
+  <!-- 믹싱 시뮬레이션 -->
+  <section class="screen" id="s-mix">
+    <div class="mix-head">
+      <span class="mix-step-pill" id="mix-pill">STEP 1</span>
+      <span class="mix-title" id="mix-title"></span>
+    </div>
+    <div class="bubble-row">
+      <img src="img/potato.png" alt="">
+      <div class="bubble" id="mix-bubble"></div>
+    </div>
+    <div class="mix-stage" id="stage">
+      <div id="pour-src"></div>
+      <div id="stream"></div>
+      <div class="stir-gauge" id="stir-gauge">🌀 <span id="stir-n">0</span> 바퀴</div>
+      <div class="bowl-wrap">
+        <div class="bowl">
+          <div class="fill" id="fill-powder"></div>
+          <div class="fill" id="fill-liquid"></div>
+          <div class="fill" id="fill-paste"></div>
+        </div>
+        <div class="half-line" id="half-line"><span>절반선</span></div>
+        <div class="bowl-rim"></div>
+      </div>
+      <div id="spatula"><div class="handle"></div><div class="blade"><div class="blob" id="spat-blob"></div></div></div>
+      <div id="drop-blob"></div>
+      <div id="stir-arrow"><svg viewBox="0 0 120 120" width="88" height="88">
+        <g fill="none" stroke="#e8926f" stroke-width="9" stroke-linecap="round">
+          <path d="M99.5 45.6 A42 42 0 0 0 20.5 45.6"/>
+          <path d="M20.5 74.4 A42 42 0 0 0 99.5 74.4"/>
+        </g>
+        <polygon points="20.5,60 9,40 33,43" fill="#e8926f"/>
+        <polygon points="99.5,60 111,80 87,77" fill="#e8926f"/>
+      </svg></div>
+      <div id="toast"></div>
+      <div class="face-scene" id="face-scene">
+        <div style="font-size:17px; margin-bottom:8px;" id="face-label">부드럽게 펴 발라요</div>
+        <div class="face">🙂<div class="mask-layer" id="mask-layer"></div></div>
+        <div class="timer-txt" id="timer-txt"></div>
+        <div class="small" id="face-tip"></div>
+      </div>
+    </div>
+    <div class="tools" id="tools"></div>
+  </section>
+
+  <!-- 인증서 -->
+  <section class="screen" id="s-cert">
+    <div class="q-pill" style="align-self:center;">연습은 끝!! 🎉</div>
+    <div class="cert-hang">📍</div>
+    <div class="cert">
+      <div class="stamp">예감<br>공식인증</div>
+      <h2>모델링팩 조제 인증서</h2>
+      <div class="cert-row">
+        <img src="img/potato.png" alt="">
+        <div class="cert-info">
+          이름 <b id="c-name">-</b><br>
+          레시피 <b id="c-recipe"></b><br>
+          등급 <b id="c-level"></b>
+        </div>
+      </div>
+      <div class="cert-line" id="c-line"></div>
+      <div class="cert-line" style="margin-top:8px; text-align:center;">
+        오늘 익힌 황금비, 실전에서도 똑같이!<br><b id="c-ratio"></b>
+      </div>
+      <div class="cert-foot"><span>예감마켓 모델링팩</span><span id="c-date"></span></div>
+    </div>
+    <div class="save-hint">▲ 꾹 눌러서 저장하기 ▲</div>
+    <div class="bubble-row" style="margin-top:6px;">
+      <img src="img/potato.png" alt="">
+      <div class="bubble">손에 익혔으니 이제 진짜 팩으로 해볼 차례! 황금비 기억하지? 🥣</div>
+    </div>
+    <div class="share-row">
+      <button class="share-btn" onclick="shareResult()">↗</button>
+      <button class="share-btn" onclick="copyLink()">🔗</button>
+      <button class="share-btn" onclick="location.reload()">↺</button>
+    </div>
+    <button class="btn" onclick="window.open(LINKS.store)">이제 직접 하러가기 🥣</button>
+    <button class="btn ghost" onclick="window.open(LINKS.follow)">예감마켓 팔로우하기</button>
+    <div class="notice">본 콘텐츠는 피부 타입 취향 테스트이며 의학적 진단이 아닙니다.<br>예감마켓이 판매·공구하는 제품이 포함되어 있습니다.</div>
+  </section>
+
+</div>
+
+<script src="data/questions.js"></script>
+<script src="data/recipes.js"></script>
+<script>
+/* ---------- 상태 ---------- */
+const S = { qi:0, answers:{}, recipe:null, userName:'', careIdx:0 };
+const $ = id => document.getElementById(id);
+function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); }
+
+/* ---------- 인트로 → 질문 ---------- */
+function startQuiz(){
+  S.userName = $('name-input').value.trim();
+  S.qi = 0; renderQ(); go('s-quiz');
+}
+function renderQ(){
+  const q = QUESTIONS[S.qi];
+  $('q-pill').textContent = `${S.qi+1} / ${QUESTIONS.length}`;
+  $('q-text').textContent = q.text;
+  $('q-opts').innerHTML = q.options.map((o,i)=>
+    `<button class="opt" onclick="pick(${i})"><span>${o.emoji}</span><span>${o.label}</span></button>`).join('');
+}
+function pick(i){
+  const q = QUESTIONS[S.qi];
+  S.answers[q.id] = q.options[i].tag;
+  if(S.qi < QUESTIONS.length-1){ S.qi++; renderQ(); }
+  else finishQuiz();
+}
+function backQuiz(){
+  if(S.qi>0){ S.qi--; renderQ(); } else go('s-intro');
+}
+function finishQuiz(){
+  $('loading-name').textContent = S.userName ? `${S.userName}님 ` : '';
+  go('s-loading');
+  setTimeout(showResult, 1600);
+}
+
+/* ---------- 결과 ---------- */
+function showResult(){
+  const rid = RESULT_MAP[S.answers.q1][S.answers.q2];
+  S.recipe = RECIPES[rid]; S.rid = rid;
+  const r = S.recipe;
+  $('r-sub').textContent = r.sub;
+  $('r-emoji').textContent = r.emoji;
+  $('r-name').textContent = r.name;
+  $('r-ratio').textContent = r.ratioText;
+  $('r-reason').textContent = r.reason;
+  if(r.warn){ $('r-warn').style.display='block'; $('r-warn').textContent = r.warn; }
+  else $('r-warn').style.display='none';
+  $('care-mini').innerHTML = '<b>💡 팩 전 순서</b>' + r.care.map((c,i)=>`${i+1}. ${c}`).join('<br>');
+  go('s-result');
+}
+
+/* ---------- 믹싱 시뮬레이션 ---------- */
+/* 스텝 정의: 레시피에 따라 동적 구성 */
+let MIX = null;
+function buildSteps(){
+  const r = S.recipe;
+  const steps = [];
+  if(r.preStep) steps.push({key:'pre', title:r.preStep.title, bubble:r.preStep.desc + ' 준비되면 아래 버튼!', tool:{emoji:'🌿', label:'겔 진정 완료!'}});
+  steps.push({key:'powder', title:'가루 붓기', bubble:'먼저 파우치를 탭해서 가루를 부어줘!', tool:{emoji:'🥡', label:'가루 붓기 (탭)'}});
+  if(r.additive) steps.push({key:'additive', title:`${r.additive.label} 붓기`, bubble:`오늘의 비밀 재료! <b>${r.additive.label}</b>을 꾹 눌러 부어줘. (0.5만큼)`, tool:{emoji:r.additive.emoji, label:'꾹 눌러 붓기'}});
+  steps.push({key:'waterHalf', title:`${r.liquid.label} — 절반만!`, bubble:`잠깐! 물은 <b>절반만 먼저</b>야. 한 번에 다 부으면 실패한다궁! 꾹 눌러봐.`, tool:{emoji:r.liquid.emoji, label:'꾹 눌러 붓기'}});
+  steps.push({key:'stir1', title:'1차 젓기', bubble:'스패츌러로 <b>빙글빙글</b> 저어줘! 볼 안에서 원을 그려봐. (3바퀴)', stir:3});
+  steps.push({key:'drops', title:'나머지는 조금씩!', bubble:'이제 남은 물을 <b>조금씩 나눠서</b>! 탭 한 번 = 한 스푼. 상태 보면서 천천히~', tool:{emoji:'💧', label:'한 스푼 추가 (탭)'}, need:4});
+  steps.push({key:'stir2', title:'마무리 젓기', bubble:'덩어리 없이 매끈해질 때까지! (3바퀴)', stir:3});
+  steps.push({key:'flip', title:'뒤집기 테스트', bubble:'반죽을 떠서 스패츌러를 <b>뒤집어보자</b>. 안 떨어지면 합격!', tool:{emoji:'🔃', label:'뒤집기 테스트!'}});
+  steps.push({key:'apply', title:'도포 & 15분', bubble:'완벽해! 이제 얼굴에 펴 바르고 15분 기다리면 끝이라궁.', tool:{emoji:'😊', label:'펴 바르기'}});
+  return steps;
+}
+function startMix(){
+  MIX = { steps:buildSteps(), i:0, stirCount:0, stirAngle:0, lastAngle:null, drops:0, lastDrop:0,
+          powder:0, liquid:0, mixedStage:0 };
+  // 볼 초기화
+  $('fill-powder').style.height='0%'; $('fill-liquid').style.height='0%';
+  $('fill-paste').style.display='none'; $('fill-paste').style.height='0%';
+  $('face-scene').style.display='none'; $('stir-gauge').style.display='none';
+  $('half-line').style.display='none';
+  go('s-mix'); renderMixStep();
+}
+function renderMixStep(){
+  const st = MIX.steps[MIX.i];
+  $('mix-pill').textContent = `STEP ${MIX.i+1}`;
+  $('mix-title').textContent = st.title;
+  $('mix-bubble').innerHTML = st.bubble;
+  $('stir-gauge').style.display = st.stir ? 'block' : 'none';
+  if(st.key==='waterHalf'){
+    $('half-line').style.display='block';
+    $('half-line').style.bottom = (MIX.powder + MIX.liquid + 26) + '%';  /* 물이 멈추는 높이 = 절반선 */
+  } else $('half-line').style.display='none';
+  if(st.stir){
+    MIX.stirCount=0; MIX.lastAngle=null; MIX.stirDone=false; $('stir-n').textContent='0';
+    const ar = $('stir-arrow');
+    ar.style.display='block'; ar.classList.add('idle');   /* 젓기 전엔 힌트로 천천히 회전 */
+    ar.style.transform='translateX(-50%)';
+  } else $('stir-arrow').style.display='none';
+  renderTool(st);
+}
+function renderTool(st){
+  const t = $('tools');
+  if(st.stir){ t.innerHTML = `<div class="tool glow" style="cursor:default;"><b>🌀</b>볼 안에서 원을 그리며 저어요</div>`; return; }
+  const hold = (st.key==='waterHalf' || st.key==='additive');
+  t.innerHTML = `<button class="tool glow" id="tool-btn"><b>${st.tool.emoji}</b>${st.tool.label}</button>`;
+  const btn = $('tool-btn');
+  if(hold){
+    let pouring=false, level=0, raf;
+    const liq = st.key==='additive' ? S.recipe.additive : S.recipe.liquid;
+    const maxLevel = st.key==='additive' ? 14 : 26;
+    const startLiquid = MIX.liquid;   /* 스텝 시작 시점 기준 — 눌렀다 떼도 누적 유지 */
+    const base = ()=> startLiquid;
+    const start = e => { e.preventDefault(); if(pouring) return; pouring=true;
+      setPourSide('left', st.tool.emoji);
+      $('stream').style.background = liq.color;
+      const tick = ()=>{ if(!pouring) return;
+        level = Math.min(maxLevel, level+0.55);
+        $('stream').style.height='150px';
+        MIX.liquid = base() + level;
+        drawBowl();
+        if(level>=maxLevel){ stop(true); return; }
+        raf = requestAnimationFrame(tick);
+      }; tick();
+    };
+    const stop = auto => { if(!pouring) return; pouring=false; cancelAnimationFrame(raf);
+      $('stream').style.height='0'; $('pour-src').style.display='none';
+      if(level>=maxLevel){
+        if(st.key==='additive') MIX.additivePoured = true;
+        toast(st.key==='additive' ? '비밀 재료 투하 완료!' : '절반선에서 스톱! 잘했어 👏');
+        setTimeout(nextMix, 900);
+      } else toast('꾹~ 누르고 있어야 해!');
+    };
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', ()=>stop(false));
+    btn.addEventListener('pointerleave', ()=>stop(false));
+  } else {
+    btn.onclick = ()=> handleTap(st);
+  }
+}
+function drawBowl(){
+  $('fill-powder').style.height = MIX.powder+'%';
+  const liqEl = $('fill-liquid');
+  liqEl.style.bottom = MIX.powder+'%';       /* 액체는 가루층 위에 쌓임 */
+  liqEl.style.height = MIX.liquid+'%';
+  const key = MIX.steps[MIX.i].key;
+  let col = S.recipe.liquid.color;
+  if(S.recipe.additive){
+    if(key==='additive') col = S.recipe.additive.color;
+    else if(MIX.additivePoured) col = `color-mix(in srgb, ${S.recipe.additive.color} 45%, ${S.recipe.liquid.color})`;
+  }
+  liqEl.style.background = col;
+}
+/* 붓기 위치: 가루=오른쪽 / 물·앰플=왼쪽 */
+function setPourSide(side, emoji){
+  const x = side==='left' ? '30%' : '70%';
+  const src = $('pour-src'), stm = $('stream');
+  src.style.left = x; stm.style.left = x;
+  src.className = side==='left' ? 'tilt-l' : 'tilt-r';
+  src.textContent = emoji; src.style.display='block';
+}
+function hidePour(){ $('pour-src').style.display='none'; $('stream').style.height='0'; }
+function pourFX(side, emoji, color, ms, cb){
+  setPourSide(side, emoji);
+  $('stream').style.background = color;
+  $('stream').style.height = '150px';
+  setTimeout(()=>{ hidePour(); cb && cb(); }, ms);
+}
+function handleTap(st){
+  if(st.key==='pre'){ toast('열 잘 내렸어! 이제 팩 시작 🌿'); setTimeout(nextMix, 800); }
+  else if(st.key==='powder'){
+    pourFX('right', st.tool.emoji, '#d9d3b4', 900, ()=>{
+      MIX.powder = 34; drawBowl();
+      toast('가루 소복소복 ⛰️'); setTimeout(nextMix, 800);
+    });
+  }
+  else if(st.key==='drops'){
+    const now = Date.now();
+    if(now - MIX.lastDrop < 450){ toast('천천히~ 상태 보면서!'); return; }
+    MIX.lastDrop = now;
+    MIX.drops++;
+    pourFX('left', '💧', S.recipe.liquid.color, 300, ()=>{ MIX.liquid += 3; drawBowl(); });
+    if(MIX.drops >= st.need){ toast('농도 딱 좋아! 이 감각이야 ✨'); setTimeout(nextMix, 900); }
+    else toast(`한 스푼 추가 (${MIX.drops}/${st.need})`);
+  }
+  else if(st.key==='flip'){
+    // 젓기를 다 마친 상태로만 도달 가능 → 담그기→떠올리기→뒤집기→퐁 떨어뜨리기 풀 액션
+    const sp = $('spatula'), blob = $('spat-blob');
+    $('tool-btn').disabled = true;
+    sp.style.transition='top .55s ease, transform .6s ease';
+    sp.style.left='50%'; sp.style.top='26%'; sp.style.display='block';
+    setTimeout(()=>{ sp.style.top='54%'; }, 80);                     /* 1. 볼에 담그기 */
+    setTimeout(()=>{                                                 /* 2. 반죽 떠올리기 */
+      blob.style.display='block'; blob.style.background = pasteColor();
+      sp.style.top='32%';
+    }, 750);
+    setTimeout(()=>{ sp.style.transform='translate(-50%,-88%) rotate(180deg)'; }, 1500); /* 3. 뒤집기 */
+    setTimeout(()=>{ toast('안 떨어진다! 황금비 합격 🏆'); }, 2150);
+    setTimeout(()=>{ sp.style.transform='translate(-50%,-88%) rotate(16deg)'; }, 3300);  /* 4. 원위치 */
+    setTimeout(()=>{ blob.style.display='none'; dropBlob(); }, 3950); /* 5. 퐁 떨어뜨리기 */
+    setTimeout(()=>{
+      sp.style.display='none'; sp.style.transition='';
+      nextMix();
+    }, 4800);
+  }
+  else if(st.key==='apply'){ applyScene(); }
+}
+function pasteColor(){
+  return `color-mix(in srgb, ${S.recipe.liquid.color} 22%, #d8d2b6)`;
+}
+/* 반죽이 볼로 퐁 떨어지는 연출 */
+function dropBlob(){
+  const d = $('drop-blob');
+  const surface = 54 - (MIX.powder + MIX.liquid) * 0.12;  /* 반죽 표면 근처(%) */
+  d.style.transition='none';
+  d.style.background = pasteColor();
+  d.style.top='30%'; d.style.opacity='1'; d.style.display='block';
+  d.style.transform='translateX(-50%) scale(1)';
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+    d.style.transition='top .4s cubic-bezier(.5,.05,.9,.6), transform .15s .4s, opacity .3s .5s';
+    d.style.top = surface + '%';
+    d.style.transform='translateX(-50%) scale(1.5, .5)';   /* 착지 시 찹 눌림 */
+    d.style.opacity='0';
+  }); });
+  setTimeout(()=>{ d.style.display='none'; toast('퐁! 완벽한 농도 ✨'); }, 750);
+}
+/* 젓기: 볼 중심 기준 각도 누적 */
+const stage = document.getElementById('stage');
+stage.addEventListener('pointermove', e=>{
+  if(!MIX) return;
+  const st = MIX.steps[MIX.i];
+  if(!st || !st.stir || MIX.stirDone) return;
+  const rect = stage.getBoundingClientRect();
+  const cx = rect.left + rect.width/2, cy = rect.top + rect.height*0.72;
+  const ang = Math.atan2(e.clientY-cy, e.clientX-cx);
+  const sp = $('spatula');
+  sp.style.display='block';
+  sp.style.left = (e.clientX-rect.left)+'px'; sp.style.top = (e.clientY-rect.top)+'px';
+  if(MIX.lastAngle!==null){
+    let d = ang - MIX.lastAngle;
+    if(d>Math.PI) d-=2*Math.PI; if(d<-Math.PI) d+=2*Math.PI;
+    MIX.stirAngle += Math.abs(d);
+    const ar = $('stir-arrow');                            /* 젓는 만큼 화살표 회전 */
+    ar.classList.remove('idle');
+    ar.style.transform = `translateX(-50%) rotate(${Math.round(MIX.stirAngle*180/Math.PI)}deg)`;
+    const turns = Math.floor(MIX.stirAngle/(2*Math.PI));
+    if(turns !== MIX.stirCount){
+      MIX.stirCount = turns; $('stir-n').textContent = turns;
+      mixTexture();
+      if(turns >= st.stir){
+        MIX.stirDone=true;
+        $('stir-arrow').style.display='none';
+        sp.style.display='none'; MIX.stirAngle=0;
+        toast(st.key==='stir1' ? '되직~하게 뭉쳐졌어!' : '매끈매끈, 완벽해!');
+        setTimeout(nextMix, 900);
+      }
+    }
+  }
+  MIX.lastAngle = ang;
+});
+stage.addEventListener('pointerleave', ()=>{ if(MIX){ MIX.lastAngle=null; $('spatula').style.display='none'; } });
+function mixTexture(){
+  MIX.mixedStage++;
+  const total = MIX.powder + MIX.liquid;
+  const paste = $('fill-paste');
+  paste.style.display='block';
+  paste.style.height = total+'%';
+  // 젓을수록 색이 섞인 반죽색으로
+  const t = Math.min(1, MIX.mixedStage/5);
+  paste.style.opacity = t;
+  paste.style.background = `color-mix(in srgb, ${S.recipe.liquid.color} ${Math.round(22*t)}%, #d8d2b6)`;
+}
+function nextMix(){
+  MIX.i++;
+  if(MIX.i < MIX.steps.length) renderMixStep();
+}
+/* 도포 & 타이머 */
+function applyScene(){
+  $('face-scene').style.display='block';
+  const m = $('mask-layer');
+  m.style.background = `color-mix(in srgb, ${S.recipe.liquid.color} 30%, #efe9dc)`;
+  setTimeout(()=>{ m.style.width='96px'; m.style.height='84px'; }, 100);
+  let left = PACK_MINUTES;
+  $('timer-txt').textContent = `⏱ ${left}:00`;
+  $('face-tip').textContent = '(빨리감기 중… 실제로는 15분 기다려요!)';
+  const iv = setInterval(()=>{
+    left--;
+    $('timer-txt').textContent = `⏱ ${left}:00`;
+    if(left<=0){
+      clearInterval(iv);
+      $('face-label').textContent = '15분 완료! 팩이 탱글하게 굳었어요';
+      $('timer-txt').textContent = '🎉';
+      setTimeout(showCert, 1000);
+    }
+  }, 180);
+}
+
+/* ---------- 인증서 ---------- */
+function showCert(){
+  const lvl = LEVEL_MAP[S.answers.q3];
+  $('c-name').textContent = S.userName || '예감 프렌즈';
+  $('c-recipe').textContent = `${S.recipe.emoji} ${S.recipe.name}`;
+  $('c-level').textContent = `${lvl.lv} ${lvl.name}`;
+  $('c-line').textContent = lvl.line;
+  $('c-ratio').textContent = S.recipe.ratioText + ' · 절반 먼저, 나머지는 조금씩!';
+  const d = new Date();
+  $('c-date').textContent = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  go('s-cert');
+}
+function shareResult(){
+  const url = location.origin + location.pathname + `?r=${S.rid}`;
+  if(navigator.share) navigator.share({title:'모델링팩 황금 레시피', text:`내 레시피는 ${S.recipe.name}! 너도 해봐`, url});
+  else copyLink();
+}
+function copyLink(){
+  const url = location.origin + location.pathname + `?r=${S.rid||''}`;
+  navigator.clipboard.writeText(url).then(()=>toast2('링크 복사 완료!'));
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1300);
+}
+function toast2(msg){ alert(msg); } /* 인증서 화면용 간단 알림 */
+
+/* 공유 URL로 진입 시 결과 바로 보기 */
+(function(){
+  const rid = new URLSearchParams(location.search).get('r');
+  if(rid && RECIPES[rid]){
+    S.recipe = RECIPES[rid]; S.rid = rid;
+    S.answers.q3 = '처음';
+  }
+})();
+</script>
+</body>
+</html>
