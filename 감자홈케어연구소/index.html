@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>홈케어 MBTI — 감자 홈케어 연구소</title>
+<meta property="og:title" content="🥔 홈케어 MBTI">
+<meta property="og:description" content="나는 어떤 홈케어 유형? 질문 8개로 내 케어 성향 알아보기!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f1e6; --panel:#fdfaf1; --panel-line:#e4d9bc; --line-soft:#ece3cc;
+  --brown:#453729; --brown-lt:#8d7d66; --btn:#453729; --btn-txt:#faf6ec;
+  --accent:#cf7350; --accent-soft:#f6e8df; --pill:#fdfbf4; --red:#b3564e; --gold:#a4822a;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;
+  background:#d3c7a9; color:var(--brown);
+  display:flex; justify-content:center; min-height:100dvh;
+}
+#app{
+  width:100%; max-width:430px; min-height:100dvh; background:var(--bg);
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 0 48px rgba(80,64,40,.3);
+}
+/* 통통 마스코트 — 설문 화면에서만, 선택지 옆 순찰 */
+#mascot{
+  display:none; position:absolute; left:-3px; width:44px; z-index:60;
+  pointer-events:none; animation:patrol 7s ease-in-out infinite;
+  --m-top:330px; --m-bottom:560px;
+}
+@keyframes patrol{
+  0%{top:var(--m-top);} 50%{top:var(--m-bottom);} 100%{top:var(--m-top);}
+}
+#mascot .hop{animation:hop .5s cubic-bezier(.45,0,.55,1) infinite alternate;}
+@keyframes hop{
+  from{transform:translateX(0) scale(1.06,.94);}
+  to{transform:translateX(6px) translateY(-7px) scale(.97,1.05);}
+}
+#mascot img{width:100%; display:block; filter:drop-shadow(0 3px 3px rgba(80,64,40,.22));}
+#mascot .m-clip{
+  position:absolute; bottom:-2px; right:-8px; font-size:15px; transform:rotate(14deg);
+}
+
+.screen{display:none; flex:1; flex-direction:column; padding:24px 22px 36px; animation:fadein .35s ease;}
+.screen.on{display:flex;}
+@keyframes fadein{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+
+.btn{
+  display:block; width:100%; border:none; cursor:pointer; text-align:center;
+  font-family:'Jua',sans-serif; font-size:17.5px; letter-spacing:.5px;
+  color:var(--btn-txt); background:var(--btn);
+  padding:16px; border-radius:16px; margin-top:10px;
+  box-shadow:0 8px 18px rgba(69,55,41,.22);
+  transition:transform .1s, box-shadow .1s;
+}
+.btn:active{transform:translateY(2px); box-shadow:0 3px 8px rgba(69,55,41,.25);}
+.btn.ghost{background:transparent; color:var(--brown); box-shadow:none; border:1.5px solid var(--brown);}
+.bubble-row{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;}
+.bubble-row img{width:60px; height:60px; object-fit:contain; flex:none; filter:drop-shadow(0 3px 4px rgba(80,64,40,.2));}
+.bubble{
+  background:#fff; border:1.5px solid var(--line-soft); border-radius:14px;
+  padding:11px 14px; font-size:14px; line-height:1.6; position:relative; flex:1;
+  box-shadow:0 3px 10px rgba(80,64,40,.06);
+}
+.bubble::before{
+  content:""; position:absolute; left:-8px; top:22px; width:13px; height:13px;
+  background:#fff; border-left:1.5px solid var(--line-soft); border-bottom:1.5px solid var(--line-soft);
+  transform:rotate(45deg);
+}
+.small{font-size:12.5px; color:var(--brown-lt);}
+
+/* 인트로 */
+#s-intro{justify-content:flex-start;}
+.logo-area{text-align:center; margin:16px 0 6px;}
+.logo-tag{
+  display:inline-block; color:var(--accent); font-size:12px; letter-spacing:3px;
+  border-bottom:1.5px solid var(--accent); padding-bottom:4px;
+}
+h1.logo{font-family:'Jua',sans-serif; font-size:44px; margin:14px 0 4px; line-height:1.16; letter-spacing:1px;}
+.logo-sub{font-size:14px; color:var(--brown-lt); margin-bottom:10px; letter-spacing:.3px;}
+.hero{position:relative; text-align:center; margin:8px 0 18px;}
+.hero img{width:140px; animation:bob 2.6s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)}}
+.hero .float{position:absolute; font-size:24px; opacity:.85; animation:bob 3s ease-in-out infinite;}
+.name-input{
+  width:100%; border:1.5px solid var(--line-soft); border-radius:14px; background:#fff;
+  padding:14px 18px; font-size:15px; font-family:inherit; color:var(--brown); margin-top:8px;
+}
+.name-input::placeholder{color:#b5a98f;}
+.name-input:focus{outline:none; border-color:var(--accent);}
+.counter{display:flex; justify-content:center; gap:34px; margin-top:18px; text-align:center;}
+.counter b{display:block; font-size:19px; font-family:'Jua',sans-serif;}
+.counter span{font-size:12px; color:var(--brown-lt); letter-spacing:.5px;}
+
+/* 질문 */
+.q-pill{
+  align-self:center; font-family:'Jua',sans-serif; color:var(--accent);
+  font-size:15px; letter-spacing:2px; margin-bottom:4px;
+}
+.q-cat{align-self:center; font-size:12px; color:var(--brown-lt); letter-spacing:2px; margin-bottom:14px;}
+.q-text{font-family:'Jua',sans-serif; font-size:24px; text-align:center; line-height:1.42; white-space:pre-line; margin:4px 0 22px;}
+.opt{
+  width:100%; text-align:left; font-family:inherit; font-size:14.5px; color:var(--brown);
+  background:#fff; border:1.5px solid var(--line-soft); border-radius:14px;
+  padding:15px 17px; margin-bottom:10px; cursor:pointer; display:flex; gap:11px; align-items:flex-start;
+  transition:transform .08s, border-color .15s; line-height:1.5;
+  box-shadow:0 3px 10px rgba(80,64,40,.05);
+}
+.opt .o-emoji{flex:none; margin-top:1px;}
+.opt:active{transform:scale(.98); border-color:var(--accent);}
+.back{position:absolute; top:18px; left:18px; background:none; border:none; font-size:21px; color:var(--brown-lt); cursor:pointer; font-family:inherit; z-index:5;}
+
+/* 로딩 */
+#s-loading{justify-content:center; align-items:center; text-align:center;}
+#s-loading p{font-family:'Jua',sans-serif;}
+.dots span{display:inline-block; width:9px; height:9px; margin:0 4px; border-radius:50%; background:var(--brown); animation:dot 1s infinite;}
+.dots span:nth-child(2){animation-delay:.15s} .dots span:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,100%{transform:translateY(0); opacity:.4} 50%{transform:translateY(-8px); opacity:1}}
+
+/* ---------- 결과 카드 ---------- */
+#s-result{padding-top:20px;}
+.card{
+  background:var(--panel); border:1px solid #ddd1b2; border-radius:20px;
+  padding:24px 18px 16px; position:relative;
+  box-shadow:0 14px 34px rgba(80,64,40,.16); text-align:center;
+}
+.card::before{content:""; position:absolute; inset:8px; border:1px dashed #e0d5b6; border-radius:14px; pointer-events:none;}
+.card-lab{font-size:10.5px; color:var(--brown-lt); letter-spacing:3px;}
+.type-letters{display:flex; justify-content:center; gap:8px; margin:14px 0 6px;}
+.tl{
+  background:var(--brown); color:var(--btn-txt); border-radius:12px; padding:8px 0 6px;
+  width:74px; box-shadow:0 4px 10px rgba(69,55,41,.18);
+}
+.tl b{font-family:'Jua',sans-serif; font-size:24px; display:block; line-height:1;}
+.tl span{font-size:10px; opacity:.75; letter-spacing:1px;}
+.type-emoji{font-size:42px; margin:8px 0 0;}
+.type-name{font-family:'Jua',sans-serif; font-size:26px; margin:2px 0 2px; letter-spacing:.5px;}
+.type-for{font-size:12.5px; color:var(--brown-lt); margin-bottom:12px; letter-spacing:.5px;}
+.type-desc{
+  font-size:13.5px; line-height:1.7;
+  background:#fff; border:1px solid var(--line-soft); border-radius:12px;
+  padding:12px 14px; text-align:left;
+}
+/* 듣고 싶은 말 */
+.wish{
+  margin-top:10px; background:var(--accent-soft); border:1px solid #ecd0bf; border-radius:12px;
+  padding:11px 13px; text-align:center;
+}
+.wish .w-label{font-size:11px; color:var(--accent); letter-spacing:2px;}
+.wish .w-quote{font-family:'Jua',sans-serif; font-size:15px; margin-top:4px; line-height:1.5;}
+/* 케어 궁합 바 */
+.affin{margin-top:14px; text-align:left;}
+.affin-title{font-size:12px; color:var(--accent); letter-spacing:2px; margin-bottom:8px; text-align:center;}
+.af-row{display:flex; align-items:center; gap:9px; margin-bottom:7px;}
+.af-label{flex:none; width:92px; font-size:12.5px;}
+.af-bar{flex:1; height:9px; background:#eee4ca; border-radius:6px; overflow:hidden;}
+.af-fill{height:100%; border-radius:6px; background:linear-gradient(90deg,#dfa079,var(--accent)); width:0%; transition:width .9s ease;}
+.af-pct{flex:none; width:38px; font-size:12px; text-align:right; color:var(--brown-lt);}
+.card-foot{display:flex; justify-content:space-between; font-size:11px; color:var(--brown-lt); letter-spacing:1px; margin-top:14px; position:relative;}
+.save-hint{text-align:center; font-size:12.5px; color:var(--gold); letter-spacing:1px; margin:12px 0 2px;}
+.share-row{display:flex; justify-content:center; gap:14px; margin:8px 0 4px;}
+.share-btn{
+  width:50px; height:50px; border-radius:50%; border:none; background:var(--brown); color:#fff;
+  font-size:20px; cursor:pointer; font-family:inherit;
+  box-shadow:0 5px 12px rgba(69,55,41,.2);
+}
+.notice{font-size:10.5px; color:#a89b7e; text-align:center; margin-top:14px; line-height:1.6;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 통통 감자 연구원 (클립보드 들고 순찰) -->
+  <div id="mascot"><div class="hop"><div style="position:relative;">
+    <img src="img/potato.png" alt="">
+    <div class="m-clip">📋</div>
+  </div></div></div>
+
+  <!-- 인트로 -->
+  <section class="screen on" id="s-intro">
+    <div class="logo-area">
+      <span class="logo-tag">POTATO HOMECARE LAB</span>
+      <h1 class="logo">홈케어<br>MBTI</h1>
+      <div class="logo-sub">나는 어떤 케어 유형? 8가지 중 내 유형 찾기</div>
+    </div>
+    <div class="hero">
+      <span class="float" style="left:14%; top:0;">🧖</span>
+      <span class="float" style="right:12%; top:10%; animation-delay:.5s;">⚡</span>
+      <span class="float" style="left:20%; bottom:0; animation-delay:1s;">🥣</span>
+      <span class="float" style="right:20%; bottom:6%; animation-delay:1.5s;">🫧</span>
+      <img src="img/potato.png" alt="감자 연구원">
+    </div>
+    <div class="bubble-row">
+      <div class="bubble">시트팩? 모델링? 워시오프? 디바이스?<br>다 좋은데 <b>내 성향에 맞는 케어</b>는 따로 있어!<br>8문항이면 <b>내 유형 + 케어 궁합</b>까지 나온다궁 🥔</div>
+    </div>
+    <button class="btn" onclick="startQuiz()">내 유형 알아보기</button>
+    <div class="counter">
+      <div><b>8가지</b><span>케어 유형</span></div>
+      <div><b>8문항</b><span>1분 컷</span></div>
+    </div>
+  </section>
+
+  <!-- 질문 -->
+  <section class="screen" id="s-quiz">
+    <button class="back" onclick="backQuiz()">〈</button>
+    <div class="q-pill" id="q-pill">1 / 6</div>
+    <div class="q-cat" id="q-cat"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-opts"></div>
+  </section>
+
+  <!-- 로딩 -->
+  <section class="screen" id="s-loading">
+    <img src="img/potato.png" style="width:110px; animation:bob 1.2s ease-in-out infinite;">
+    <p style="font-size:19px; margin:16px 0 10px;"><span id="loading-name"></span>케어 성향 분석 중...<br>유형 판정 들어간다궁 🧪</p>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </section>
+
+  <!-- 결과 카드 -->
+  <section class="screen" id="s-result">
+    <div class="card" id="result-card">
+      <div class="card-lab">POTATO HOMECARE LAB · 홈케어 MBTI</div>
+      <div class="type-letters" id="r-letters"></div>
+      <div class="type-emoji" id="r-emoji"></div>
+      <div class="type-name" id="r-name"></div>
+      <div class="type-for" id="r-for"></div>
+      <div class="type-desc" id="r-desc"></div>
+      <div class="wish">
+        <div class="w-label">YEGAM'S TALK</div>
+        <div class="w-quote" id="r-wish"></div>
+      </div>
+      <div class="affin">
+        <div class="affin-title">CARE MATCH · 케어 궁합</div>
+        <div id="r-affin"></div>
+      </div>
+      <div class="card-foot"><span>YEGAM MARKET</span><span id="r-date"></span></div>
+    </div>
+    <div class="save-hint">▲ 꾹 눌러서 저장하기</div>
+    <div class="bubble-row" style="margin-top:8px;">
+      <img src="img/potato.png" alt="">
+      <div class="bubble" id="r-bubble"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= 데이터 ================= */
+const LINKS = {
+  store: 'https://www.instagram.com/yegam_song', // TODO: 공구 링크로 교체
+  follow: 'https://www.instagram.com/yegam_song',
+};
+
+/* 3축: E/R(동기) · Q/F(시간) · H/T(방식)
+   동점 시 judge()가 앞 극(E/Q/H) 우선으로 판정 */
+const QUESTIONS = [
+  { cat:'집에 있는 팩', text:'서랍 속 팩,\n어떻게 쓰게 돼?',
+    options:[
+      {poles:['E'], emoji:'😅', label:'아껴두다가 유통기한 임박해서 몰아 쓴 적 있다'},
+      {poles:['R'], emoji:'🗓️', label:'요일 정해두고 착착 쓴다, 떨어지면 재주문'},
+      {poles:['E'], emoji:'💡', label:'약속 잡히면 그제서야 생각난다'},
+    ]},
+  { cat:'관리 스위치', text:'피부 관리 욕구가\n폭발하는 순간은?',
+    options:[
+      {poles:['E'], emoji:'💒', label:'결혼식·여행·행사 일정이 잡혔을 때'},
+      {poles:['R'], emoji:'🌙', label:'그냥 매일 밤, 정해진 시간이 되면'},
+      {poles:['E'], emoji:'🪞', label:'거울 보다가 피부 상태가 심상치 않을 때'},
+    ]},
+  { cat:'케어 시간', text:'케어에 쓰는 시간,\n솔직히 나는?',
+    options:[
+      {poles:['Q'], emoji:'⚡', label:'5분 넘어가면 슬슬 폰에 손이 간다'},
+      {poles:['F'], emoji:'🛁', label:'30분 풀코스도 즐겁다, 그 시간이 힐링'},
+      {poles:['Q'], emoji:'🤦', label:'시트팩 붙인 채 돌아다니다 존재를 까먹은 적 있다'},
+    ]},
+  { cat:'팩 취향', text:'어떤 팩이\n제일 좋아?',
+    options:[
+      {poles:['Q'], emoji:'⚡', label:'간단한 팩! 올리고 끝나는 게 최고'},
+      {poles:['F'], emoji:'💪', label:'조금 번거로워도 효과 확실한 거'},
+      {poles:['H'], emoji:'😍', label:'고민 왜 해? 일단 모든 팩을 좋아함'},
+    ]},
+  { cat:'팩 호불호', text:'반대로, 가장\n손이 안 가는 팩은?',
+    options:[
+      {poles:['F'], emoji:'🧖', label:'시트팩 — 붙이기만 하는 건 뭔가 아쉽다'},
+      {poles:['Q'], emoji:'🫧', label:'워시오프팩 — 발랐다 씻어내는 게 은근 귀찮다'},
+      {poles:['T'], emoji:'🥣', label:'모델링팩 — 섞고 계량하는 게 부담스럽다'},
+    ]},
+  { cat:'전날 밤', text:'중요한 약속 전날 밤,\n나는?',
+    options:[
+      {poles:['E','Q'], emoji:'😴', label:'누워서 "내일 화장 잘 먹어야 하는데…" 걱정만 하다 잔다'},
+      {poles:['E','F'], emoji:'🚨', label:'비상사태 선포! 팩 꺼내서 풀케어 돌린다'},
+      {poles:['R'], emoji:'😌', label:'평소랑 똑같이. 꾸준히 해와서 걱정이 없다'},
+    ]},
+  { cat:'최애 케어', text:'홈케어 중에\n제일 좋아하는 건?',
+    options:[
+      {poles:['Q'], emoji:'🧴', label:'그냥 화장품 바르기 — 스킨 로션이면 충분'},
+      {poles:['H'], emoji:'🥣', label:'팩하기 — 올리는 순간이 제일 행복'},
+      {poles:['T'], emoji:'⚡', label:'디바이스 쓰기 — 기계가 주는 믿음'},
+    ]},
+  { cat:'뿌듯 포인트', text:'케어 끝나고\n제일 뿌듯한 순간은?',
+    options:[
+      {poles:['H'], emoji:'🤌', label:'모델링팩 통으로 떼어낼 때, 그 쾌감'},
+      {poles:['T'], emoji:'✨', label:'디바이스 끝난 직후 거울 속 탱탱함'},
+      {poles:['F'], emoji:'🛁', label:'풀코스 루틴을 다 해냈다는 성취감 그 자체'},
+    ]},
+];
+
+const AXES = [['E','R'],['Q','F'],['H','T']];
+const AXIS_WORD = {
+  E:'이벤트파', R:'루틴파', Q:'퀵케어', F:'풀코스', H:'손맛파', T:'장비파',
+};
+
+/* 8유형 — desc는 공감(내 얘기) 중심, wish는 듣고 싶은 말 */
+const TYPES = {
+  EQH: {
+    emoji:'🖐️', name:'벼락치기 금손',
+    desc:'평소엔 세수하고 크림이면 충분한 사람. 그런데 중요한 날이 잡히는 순간 팩부터 꺼낸다. 미리미리를 몰라서가 아니다 — 마감이 코앞이어야 손이 움직이는 것뿐. 그리고 신기하게, 벼락치기인데 결과가 좋다.',
+    wish:'벼락치기여도 괜찮아, 어차피 해내는 금손이니까 ✋',
+    affin:[['🥣 모델링팩',95],['🧖 시트팩',80],['🫧 워시오프',55],['⚡ 디바이스',25]],
+  },
+  EQT: {
+    emoji:'🚑', name:'피부 응급실 당직의',
+    desc:'10단계 루틴 영상은 3초 만에 끈다. 하지만 약속이 잡히면 디바이스부터 충전하는 사람. 최단 시간에 최대 효과가 나오는 루트를 본능적으로 계산한다. 관리를 안 하는 게 아니라, 낭비를 안 하는 것.',
+    wish:'필요한 순간에 정확히 움직이는 사람, 그게 진짜 실력이야 ⚡',
+    affin:[['⚡ 디바이스',95],['🧖 시트팩',75],['🥣 모델링팩',50],['🫧 워시오프',40]],
+  },
+  EFH: {
+    emoji:'🧚', name:'홈케어 요정',
+    desc:'중요한 날 전날 밤은 나만의 스파 오픈일. 조명 낮추고, 음악 틀고, 팩 반죽 섞는 시간까지 전부 의식(리추얼)이다. 평소엔 미뤄도, 각 잡고 하는 날의 정성만큼은 에스테틱 원장급.',
+    wish:'정성 들인 그 밤들, 피부에 다 쌓이고 있어 🕯️',
+    affin:[['🥣 모델링팩',90],['🫧 워시오프',80],['🧖 시트팩',70],['⚡ 디바이스',40]],
+  },
+  EFT: {
+    emoji:'📋', name:'D-데이 뷰티 플래너',
+    desc:'D-데이가 잡히면 머릿속에서 역산 스케줄이 자동으로 돌아간다. D-3 각질, D-2 팩, D-1 보습 잠금. 파우치엔 항상 플랜 B까지 들어있다. 준비성으로는 8유형 중 최강.',
+    wish:'준비된 사람은 흔들리지 않아, 내일도 계획대로 빛날 거야 ✨',
+    affin:[['⚡ 디바이스',90],['🥣 모델링팩',75],['🧖 시트팩',70],['🫧 워시오프',65]],
+  },
+  RQH: {
+    emoji:'🌱', name:'매일 5분 생활의 달인',
+    desc:'거창한 건 부담스럽다. 대신 매일 조금씩. 자기 전 팩 하나 올리는 5분이 하루를 닫는 작은 의식이다. 화려하진 않지만, 사실 제일 어려운 걸 해내고 있는 사람 — 꾸준함.',
+    wish:'매일의 5분이 세상에서 제일 어려운 건데, 이미 잘하고 있어 🌱',
+    affin:[['🧖 시트팩',90],['🥣 모델링팩',70],['🫧 워시오프',60],['⚡ 디바이스',35]],
+  },
+  RQT: {
+    emoji:'🤖', name:'루틴 자동화 반장',
+    desc:'케어도 시스템이다. 양치하듯 디바이스를 돌리고, 고민 없이 굴러가는 루틴을 이미 완성했다. 남들이 "귀찮지 않아?" 할 때 이미 끝나 있는 사람. 의지가 아니라 설계로 이긴다.',
+    wish:'루틴을 만든 사람은 뭘 해도 잘하게 되어 있어 🤖',
+    affin:[['⚡ 디바이스',95],['🧖 시트팩',70],['🥣 모델링팩',55],['🫧 워시오프',45]],
+  },
+  RFH: {
+    emoji:'🧖', name:'주말 홈스파 원장님',
+    desc:'평일은 심플하게, 주말은 풀코스로. 일요일 밤 욕실은 1인 스파샵이 된다. 정성껏 해도 아무도 몰라주지만 괜찮다 — 거울 속 내가 알고, 월요일 화장이 증명하니까.',
+    wish:'나를 아끼는 법을 아는 사람, 뭘 해도 잘할 사람 🧖',
+    affin:[['🥣 모델링팩',95],['🫧 워시오프',85],['🧖 시트팩',75],['⚡ 디바이스',50]],
+  },
+  RFT: {
+    emoji:'🧑‍🔬', name:'홈케어 수석 연구원',
+    desc:'성분표를 읽고, 디바이스 모드를 전부 써보고, 루틴을 계속 업그레이드한다. 친구들이 뭘 살지 모를 때 찾아오는 사람이 바로 나. 취미가 홈케어가 아니라, 홈케어가 전공이다.',
+    wish:'이렇게 진심인 사람은 뭘 써도 잘 쓸 사람이야 🔬',
+    affin:[['⚡ 디바이스',90],['🥣 모델링팩',85],['🫧 워시오프',75],['🧖 시트팩',70]],
+  },
+};
+</script>
+<script>
+/* ================= 로직 ================= */
+const S = { qi:0, answers:[], userName:'' };
+const $ = id => document.getElementById(id);
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');
+  $('mascot').style.display = (id==='s-quiz') ? 'block' : 'none';
+}
+
+/* ---------- 설문 ---------- */
+function startQuiz(){
+  S.qi = 0; S.answers = []; renderQ(); go('s-quiz');
+}
+function renderQ(){
+  const q = QUESTIONS[S.qi];
+  $('q-pill').textContent = `${S.qi+1} / ${QUESTIONS.length}`;
+  $('q-cat').textContent = `— ${q.cat} —`;
+  $('q-text').textContent = q.text;
+  $('q-opts').innerHTML = q.options.map((o,i)=>
+    `<button class="opt" onclick="pick(${i})"><span class="o-emoji">${o.emoji}</span><span>${o.label}</span></button>`).join('');
+  setTimeout(()=>{
+    const o = $('q-opts'), m = $('mascot');
+    m.style.setProperty('--m-top', o.offsetTop + 'px');
+    m.style.setProperty('--m-bottom', (o.offsetTop + o.offsetHeight - 70) + 'px');
+  }, 60);
+}
+function pick(i){
+  S.answers[S.qi] = i;
+  if(S.qi < QUESTIONS.length-1){ S.qi++; renderQ(); }
+  else finishQuiz();
+}
+function backQuiz(){
+  if(S.qi>0){ S.qi--; renderQ(); } else go('s-intro');
+}
+function finishQuiz(){
+  $('loading-name').textContent = S.userName ? `${S.userName}님 ` : '';
+  go('s-loading');
+  setTimeout(showResult, 1600);
+}
+
+/* ---------- 유형 판정 (동점 시 R/F/H 우선 — 유형 분포 밸런스용) ---------- */
+const TIE_PICK = ['R','F','H'];
+function judge(){
+  const score = {E:0,R:0,Q:0,F:0,H:0,T:0};
+  QUESTIONS.forEach((q,qi)=>{
+    q.options[S.answers[qi]].poles.forEach(p=>score[p]++);
+  });
+  const code = AXES.map(([a,b],ai)=>{
+    if(score[a] > score[b]) return a;
+    if(score[b] > score[a]) return b;
+    return TIE_PICK[ai];
+  }).join('');
+  return { code, letters:[...code] };
+}
+
+/* ---------- 결과 렌더 ---------- */
+function showResult(){
+  const j = judge();
+  S.result = j;
+  const t = TYPES[j.code];
+  $('r-letters').innerHTML = j.letters.map(l=>
+    `<div class="tl"><b>${l}</b><span>${AXIS_WORD[l]}</span></div>`).join('');
+  $('r-emoji').textContent = t.emoji;
+  $('r-name').textContent = t.name;
+  $('r-for').textContent = S.userName ? `${S.userName}님의 홈케어 유형` : '나의 홈케어 유형';
+  $('r-desc').textContent = t.desc;
+  $('r-wish').textContent = t.wish;
+  $('r-affin').innerHTML = t.affin.map(([label,pct])=>
+    `<div class="af-row"><span class="af-label">${label}</span><div class="af-bar"><div class="af-fill" data-w="${pct}"></div></div><span class="af-pct">${pct}%</span></div>`).join('');
+  const d = new Date();
+  $('r-date').textContent = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  $('r-bubble').innerHTML = `홈케어 궁금한 게 생기면<br>언제든 <b>예감</b>한테 편하게 물어봐!<br>감자 연구소는 늘 열려 있다궁 🥔`;
+  go('s-result');
+  setTimeout(()=>{
+    document.querySelectorAll('.af-fill').forEach(el=>{ el.style.width = el.dataset.w + '%'; });
+  }, 150);
+}
+
+/* ---------- 공유 ---------- */
+function answerCode(){ return S.answers.join(''); }
+function shareResult(){
+  const url = location.origin + location.pathname + `?c=${answerCode()}`;
+  if(navigator.share) navigator.share({title:'홈케어 MBTI', text:`나는 ${S.result.code} ${TYPES[S.result.code].emoji} ${TYPES[S.result.code].name}! 너는 어떤 유형이야?`, url});
+  else copyLink();
+}
+function copyLink(){
+  const url = location.origin + location.pathname + `?c=${answerCode()}`;
+  navigator.clipboard.writeText(url).then(()=>alert('링크 복사 완료!'));
+}
+
+/* 공유 URL 진입 시 결과 바로 보기 */
+(function(){
+  const c = new URLSearchParams(location.search).get('c');
+  if(c && c.length===QUESTIONS.length){
+    const ok = [...c].every((ch,i)=>{
+      const idx = +ch;
+      if(!QUESTIONS[i].options[idx]) return false;
+      S.answers[i] = idx;
+      return true;
+    });
+    if(ok) showResult();
+  }
+})();
+</script>
+</body>
+</html>
